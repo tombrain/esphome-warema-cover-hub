@@ -1,33 +1,14 @@
 ```yaml
 # example configuration:
 
-empty_sensor_hub:
-  id: empty_sensor_hub_1
+warema_cover_hub:
+  id: warema_cover_hub_1
+  name: "warema_cover_hub_1_name"
 
-sensor:
-  - platform: empty_sensor_hub
-    name: Sensor for empty sensor hub 1
-    empty_sensor_hub_id: empty_sensor_hub_1
-
-  - platform: empty_sensor_hub
-    name: Sensor for empty sensor hub 2
-    empty_sensor_hub_id: empty_sensor_hub_1
-
-text_sensor:
-  - platform: empty_sensor_hub
-    name: Text sensor for empty sensor hub 1
-    empty_sensor_hub_id: empty_sensor_hub_1
-
-  - platform: empty_sensor_hub
-    name: Text sensor for empty sensor hub 2
-    empty_sensor_hub_id: empty_sensor_hub_1
-
-binary_sensor:
-  - platform: empty_sensor_hub
-    name: Binary sensor for empty sensor hub 1
-    empty_sensor_hub_id: empty_sensor_hub_1
-
-  - platform: empty_sensor_hub
-    name: Binary sensor for empty sensor hub 2
-    empty_sensor_hub_id: empty_sensor_hub_1
+cover:
+  - platform: warema_cover_hub
+    name: "Cover123"
+    warema_cover_hub_id: warema_cover_hub_1
+    open_duration: 26sec
+    close_duration: 23sec
 ```
