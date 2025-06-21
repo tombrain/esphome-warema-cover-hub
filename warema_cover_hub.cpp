@@ -12,12 +12,6 @@ namespace esphome
         static const char *TAG = "warema_cover_hub";
         Mutex counter_mutex; // Define a mutex for protecting the counter
 
-        void WaremaCoverHub::register_text_sensorX(TestTextSensor *obj)
-        {
-            // Log the registration of the text sensor
-            this->text_sensors_.push_back(obj);
-        }
-
         void WaremaCoverHub::register_cover(WaremaCover *obj)
         {
             // Log the registration of the cover
@@ -33,7 +27,6 @@ namespace esphome
         {
             ESP_LOGCONFIG(TAG, "Warema Cover Hub:");
             ESP_LOGCONFIG(TAG, "  Name: %s", this->get_name().c_str());
-            ESP_LOGCONFIG(TAG, "  Number of registered text sensors: %d", this->text_sensors_.size());
             ESP_LOGCONFIG(TAG, "  Number of registered covers: %d", this->covers_.size());
         }
 
@@ -59,15 +52,6 @@ namespace esphome
             //     }
             //     last_time_ = current_time_30s; // Update the last time
             // }
-        }
-
-        void WaremaCoverHub::increase_counter(int value, TestTextSensor const &obj)
-        {
-            // Log the sensor name and value
-            ESP_LOGI(TAG, "Increasing counter by %d for sensor: %s", value, obj.get_name().c_str());
-
-            LockGuard lock(counter_mutex); // Lock the mutex
-            this->counter_ += value;
         }
     } // namespace warema_cover_hub
 } // namespace esphome
