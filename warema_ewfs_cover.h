@@ -4,37 +4,43 @@
 #include "esphome/core/automation.h"
 #include "esphome/components/cover/cover.h"
 
-// #include "RCSwitchWarema.h"
+#include "warema_cover_hub.h"
 
 namespace esphome
 {
     namespace warema_cover_hub
     {
-        class WaremaCoverHub;
         class WaremaCover : public cover::Cover, public Component
         {
         public:
-            // Constructor that accepts a pointer to the WaremaCoverHub
-            explicit WaremaCover(WaremaCoverHub *hub) : hub_(hub) {}
+            explicit WaremaCover(WaremaCoverHub *hub);
 
             void setup() override;
             void loop() override;
             void dump_config() override;
             float get_setup_priority() const override;
 
-            void set_open_duration(uint32_t open_duration) { this->open_duration_ = open_duration; }
-            void set_close_duration(uint32_t close_duration) { this->close_duration_ = close_duration; }
+            void set_open_duration(uint32_t open_duration);
+            void set_close_duration(uint32_t close_duration);
+
+            void set_devicecode1(const std::string &devicecode1);
+            void set_devicecode2(const std::string &devicecode2);
+            void set_channelcode(const std::string &channelcode);
+
             cover::CoverTraits get_traits() override;
-            cover::CoverOperation get_last_operation() const { return this->last_operation_; }
+            cover::CoverOperation get_last_operation() const;
+
+            std::string get_open_command() const;
+            std::string get_close_command() const;
+            std::string get_stop_command() const;
 
         private:
-            WaremaCoverHub *hub_{};       // Pointer to the WaremaCoverHub
+            WaremaCoverHub *hub_{};
 
-            void on_open(); // Deklaration der neuen Methode
-            void on_close(); // Deklaration der neuen Methode
-            void on_stop(); // Deklaration der neuen Methode
+            void on_open();
+            void on_close();
+            void on_stop();
 
-        protected:
             void control(const cover::CoverCall &call) override;
             bool is_at_target_() const;
 
@@ -42,8 +48,8 @@ namespace esphome
 
             void recompute_position_();
 
-            uint32_t open_duration_;
-            uint32_t close_duration_;
+            uint32_t open_duration_{0};
+            uint32_t close_duration_{0};
 
             uint32_t last_recompute_time_{0};
             uint32_t start_dir_time_{0};
@@ -54,14 +60,22 @@ namespace esphome
             bool assumed_state_{false};
             cover::CoverOperation last_operation_{cover::COVER_OPERATION_OPENING};
 
-            // unsigned int m_dataLength{1780};
-            // unsigned int m_syncLength{5000};
-            // uint8_t m_numberOfTransmissions{3}; // Default to 3 transmissions
-            // unsigned int m_sendDelay{10000};
+            std::string channelcode_{};
+            std::string devicecode1_{};
+            std::string devicecode2_{};
 
-            // InternalGPIOPin *m_transmitterPin{nullptr};
+            static constexpr std::string_view fix_command_part{"011101"};
+            static constexpr std::string_view stop_command_prefix{"001101"};
 
-            // RCSwitchWarema m_mySwitch{};
+            // Enum für die Art des Kommandos
+            enum class WaremaCommandType
+            {
+                OPEN,
+                CLOSE,
+                STOP
+            };
+
+            std::string get_command(WaremaCommandType type) const;
         };
     } // namespace warema_cover_hub
 } // namespace esphome

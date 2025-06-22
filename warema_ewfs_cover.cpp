@@ -2,40 +2,63 @@
 #include "esphome/core/log.h"
 #include "esphome/core/hal.h"
 #include <queue>
-// #include <mutex>
 
 namespace esphome
 {
     namespace warema_cover_hub
     {
         static const char *const TAG = "warema_cover_hub.cover";
-
         using namespace esphome::cover;
 
-        enum class CommandType
-        {
-            Open,
-            Close,
-            Stop
-        };
+        // Konstruktor
+        WaremaCover::WaremaCover(WaremaCoverHub *hub) : hub_(hub) {}
 
-        struct CommandEntry
-        {
-            CommandType command;
-            int remaining_transmissions;
-        };
+        // Setter
+        void WaremaCover::set_open_duration(uint32_t open_duration) { this->open_duration_ = open_duration; }
+        void WaremaCover::set_close_duration(uint32_t close_duration) { this->close_duration_ = close_duration; }
+        void WaremaCover::set_devicecode1(const std::string &devicecode1) { this->devicecode1_ = devicecode1; }
+        void WaremaCover::set_devicecode2(const std::string &devicecode2) { this->devicecode2_ = devicecode2; }
+        void WaremaCover::set_channelcode(const std::string &channelcode) { this->channelcode_ = channelcode; }
 
-        std::queue<CommandEntry> command_queue;
-        // std::mutex queue_mutex;
+        // Getter
+        cover::CoverOperation WaremaCover::get_last_operation() const { return this->last_operation_; }
+
+        std::string WaremaCover::get_command(WaremaCommandType type) const
+        {
+            std::string block1;
+            switch (type)
+            {
+            case WaremaCommandType::OPEN:
+                block1 = std::string(fix_command_part) + channelcode_ + "1";
+                break;
+            case WaremaCommandType::CLOSE:
+                block1 = std::string(fix_command_part) + channelcode_ + "0";
+                break;
+            case WaremaCommandType::STOP:
+                block1 = std::string(stop_command_prefix) + channelcode_.substr(0, 4) + "001";
+                break;
+            default:
+                block1 = "";
+                break;
+            }
+
+            // Compose the command in the requested format
+            // "S{block1}S{block2}S{block3}S"
+            return "S" + block1 + "S" + devicecode1_ + "S" + devicecode2_ + "S";
+        }
 
         void WaremaCover::dump_config()
         {
-            LOG_COVER("", "Time Based Cover", this);
+            LOG_COVER("", "WaremaCover", this);
             ESP_LOGCONFIG(TAG, "  Open Duration: %.1fs", this->open_duration_ / 1e3f);
             ESP_LOGCONFIG(TAG, "  Close Duration: %.1fs", this->close_duration_ / 1e3f);
-            // ESP_LOGCONFIG(TAG, "Used GPIO-Pin: %d", m_transmitterPin->get_pin());
-            // ESP_LOGCONFIG(TAG, "Number of Transmissions: %d", m_numberOfTransmissions);
-                }
+            ESP_LOGCONFIG(TAG, "  Devicecode 1: %s", this->devicecode1_.c_str());
+            ESP_LOGCONFIG(TAG, "  Devicecode 2: %s", this->devicecode2_.c_str());
+            ESP_LOGCONFIG(TAG, "  Channelcode:  %s", this->channelcode_.c_str());
+            ESP_LOGCONFIG(TAG, "  Command OPEN:  %s", this->get_command(WaremaCommandType::OPEN).c_str());
+            ESP_LOGCONFIG(TAG, "  Command CLOSE: %s", this->get_command(WaremaCommandType::CLOSE).c_str());
+            ESP_LOGCONFIG(TAG, "  Command STOP:  %s", this->get_command(WaremaCommandType::STOP).c_str());
+        }
 
         void WaremaCover::setup()
         {
@@ -81,35 +104,6 @@ namespace esphome
                 this->publish_state(false);
                 this->last_publish_time_ = now;
             }
-
-            // Sende Codes aus der Queue
-            // std::lock_guard<std::mutex> lock(queue_mutex);
-            // if (!command_queue.empty())
-            // {
-            //     CommandEntry &entry = command_queue.front();
-            //     // Hier den Code senden, abhängig vom CommandType
-            //     RCSwitch mySwitch = RCSwitch();
-            //     mySwitch.enableTransmit(10); // Set the GPIO pin for transmission
-
-            //     switch (entry.command)
-            //     {
-            //     case CommandType::Open:
-            //         mySwitch.send("00001", 24); // Code für Öffnen
-            //         break;
-            //     case CommandType::Close:
-            //         mySwitch.send("00010", 24); // Code für Schließen
-            //         break;
-            //     case CommandType::Stop:
-            //         mySwitch.send("00011", 24); // Code für Stoppen
-            //         break;
-            //     }
-
-            //     entry.remaining_transmissions--;
-            //     if (entry.remaining_transmissions <= 0)
-            //     {
-            //         command_queue.pop();
-            //     }
-            // }
         }
 
         float WaremaCover::get_setup_priority() const
@@ -163,14 +157,11 @@ namespace esphome
                     // already at target
                     if (this->manual_control_ && (pos == COVER_OPEN || pos == COVER_CLOSED))
                     {
-                        // for covers with manual control switch, we can't rely on the computed position, so if
-                        // the command triggered again, we'll assume it's in the opposite direction anyway.
                         auto op = pos == COVER_CLOSED ? COVER_OPERATION_CLOSING : COVER_OPERATION_OPENING;
                         this->position = pos == COVER_CLOSED ? COVER_OPEN : COVER_CLOSED;
                         this->target_position_ = pos;
                         this->start_direction_(op);
                     }
-                    // for covers with built in end stop, we should send the command again
                     if (this->has_built_in_endstop_ && (pos == COVER_OPEN || pos == COVER_CLOSED))
                     {
                         auto op = pos == COVER_CLOSED ? COVER_OPERATION_CLOSING : COVER_OPERATION_OPENING;
@@ -214,15 +205,12 @@ namespace esphome
             switch (dir)
             {
             case COVER_OPERATION_IDLE:
-                // Funktionsaufruf bei STOP hinzufügen
                 this->on_stop();
                 break;
             case COVER_OPERATION_OPENING:
-                // Funktionsaufruf bei OPEN hinzufügen
                 this->on_open();
                 break;
             case COVER_OPERATION_CLOSING:
-                // Funktionsaufruf bei CLOSE hinzufügen
                 this->on_close();
                 break;
             default:
@@ -236,32 +224,28 @@ namespace esphome
             this->last_recompute_time_ = now;
         }
 
-        // Neue Methoden hinzufügen
         void WaremaCover::on_open()
         {
-            // Hier den gewünschten Funktionsaufruf hinzufügen
             ESP_LOGD(TAG, "Cover is opening");
-            // Beispiel: custom_open_function();
-            // std::lock_guard<std::mutex> lock(queue_mutex);
-            // command_queue.push({CommandType::Open, 3}); // Code für Öffnen in die Queue eintragen, 3 Übertragungen
+
+            hub_->send_command(this->get_command(WaremaCommandType::OPEN));
+            this->last_operation_ = COVER_OPERATION_OPENING;
         }
 
         void WaremaCover::on_close()
         {
-            // Hier den gewünschten Funktionsaufruf hinzufügen
             ESP_LOGD(TAG, "Cover is closing");
-            // Beispiel: custom_close_function();
-            // std::lock_guard<std::mutex> lock(queue_mutex);
-            // command_queue.push({CommandType::Close, 3}); // Code für Schließen in die Queue eintragen, 3 Übertragungen
+
+            hub_->send_command(this->get_command(WaremaCommandType::CLOSE));
+            this->last_operation_ = COVER_OPERATION_CLOSING;
         }
 
         void WaremaCover::on_stop()
         {
-            // Hier den gewünschten Funktionsaufruf hinzufügen
             ESP_LOGD(TAG, "Cover is stopping");
-            // Beispiel: custom_stop_function();
-            // std::lock_guard<std::mutex> lock(queue_mutex);
-            // command_queue.push({CommandType::Stop, 3}); // Code für Stoppen in die Queue eintragen, 3 Übertragungen
+
+            hub_->send_command(this->get_command(WaremaCommandType::STOP));
+            this->last_operation_ = COVER_OPERATION_IDLE;
         }
 
         void WaremaCover::recompute_position_()
