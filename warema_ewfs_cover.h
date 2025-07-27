@@ -25,7 +25,9 @@ namespace esphome
 
             void set_devicecode1(const std::string &devicecode1);
             void set_devicecode2(const std::string &devicecode2);
-            void set_channelcode(const std::string &channelcode);
+            void set_opencode(const std::string &opencode);
+            void set_closecode(const std::string &closecode);
+            void set_stopcode(const std::string &stopcode);
 
             cover::CoverTraits get_traits() override;
             cover::CoverOperation get_last_operation() const;
@@ -35,39 +37,31 @@ namespace esphome
             std::string get_stop_command() const;
 
         private:
-            WaremaCoverHub *hub_{};
+            WaremaCoverHub *hub_{nullptr};
 
-            void on_open();
-            void on_close();
-            void on_stop();
+            // Timing and position
+            uint32_t open_duration_{};
+            uint32_t close_duration_{};
+            uint32_t last_recompute_time_{};
+            uint32_t start_dir_time_{};
+            uint32_t last_publish_time_{};
+            float target_position_{};
 
-            void control(const cover::CoverCall &call) override;
-            bool is_at_target_() const;
+            // State flags
+            bool has_built_in_endstop_{true};
+            bool manual_control_{false}; // Remove if unused
+            bool assumed_state_{true};  // Remove if unused
 
-            void start_direction_(cover::CoverOperation dir);
-
-            void recompute_position_();
-
-            uint32_t open_duration_{0};
-            uint32_t close_duration_{0};
-
-            uint32_t last_recompute_time_{0};
-            uint32_t start_dir_time_{0};
-            uint32_t last_publish_time_{0};
-            float target_position_{0};
-            bool has_built_in_endstop_{false};
-            bool manual_control_{false};
-            bool assumed_state_{false};
+            // Operation state
             cover::CoverOperation last_operation_{cover::COVER_OPERATION_OPENING};
 
-            std::string channelcode_{};
-            std::string devicecode1_{};
-            std::string devicecode2_{};
+            // Device codes
+            std::string opencode_;
+            std::string closecode_;
+            std::string stopcode_;
+            std::string devicecode1_;
+            std::string devicecode2_;
 
-            static constexpr std::string_view fix_command_part{"011101"};
-            static constexpr std::string_view stop_command_prefix{"001101"};
-
-            // Enum für die Art des Kommandos
             enum class WaremaCommandType
             {
                 OPEN,
@@ -75,6 +69,14 @@ namespace esphome
                 STOP
             };
 
+            // Methods
+            void control(const cover::CoverCall &call) override;
+            void on_open();
+            void on_close();
+            void on_stop();
+            bool is_at_target_() const;
+            void start_direction_(cover::CoverOperation dir);
+            void recompute_position_();
             std::string get_command(WaremaCommandType type) const;
         };
     } // namespace warema_cover_hub

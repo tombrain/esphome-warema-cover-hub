@@ -18,33 +18,39 @@ namespace esphome
         void WaremaCover::set_close_duration(uint32_t close_duration) { this->close_duration_ = close_duration; }
         void WaremaCover::set_devicecode1(const std::string &devicecode1) { this->devicecode1_ = devicecode1; }
         void WaremaCover::set_devicecode2(const std::string &devicecode2) { this->devicecode2_ = devicecode2; }
-        void WaremaCover::set_channelcode(const std::string &channelcode) { this->channelcode_ = channelcode; }
+        void WaremaCover::set_opencode(const std::string &opencode) { this->opencode_ = opencode; }
+        void WaremaCover::set_closecode(const std::string &closecode) { this->closecode_ = closecode; }
+        void WaremaCover::set_stopcode(const std::string &stopcode) { this->stopcode_ = stopcode; }
 
         // Getter
         cover::CoverOperation WaremaCover::get_last_operation() const { return this->last_operation_; }
 
         std::string WaremaCover::get_command(WaremaCommandType type) const
         {
-            std::string block1;
+            // Compose the command: S{commandcode}S{devicecode1_}S{devicecode2_}S
+            std::string command;
+            command.reserve(1 + opencode_.size() + 1 + devicecode1_.size() + 1 + devicecode2_.size() + 1);
+
+            command.push_back('S');
             switch (type)
             {
             case WaremaCommandType::OPEN:
-                block1 = std::string(fix_command_part) + channelcode_ + "1";
+                command.append(opencode_);
                 break;
+
             case WaremaCommandType::CLOSE:
-                block1 = std::string(fix_command_part) + channelcode_ + "0";
+                command.append(closecode_);
                 break;
+
             case WaremaCommandType::STOP:
-                block1 = std::string(stop_command_prefix) + channelcode_.substr(0, 4) + "001";
-                break;
-            default:
-                block1 = "";
+                command.append(stopcode_);
                 break;
             }
 
-            // Compose the command in the requested format
-            // "S{block1}S{block2}S{block3}S"
-            return "S" + block1 + "S" + devicecode1_ + "S" + devicecode2_ + "S";
+            command.push_back('S');
+            command.append(devicecode1_).push_back('S');
+            command.append(devicecode2_).push_back('S');
+            return command;
         }
 
         void WaremaCover::dump_config()
@@ -52,9 +58,11 @@ namespace esphome
             LOG_COVER("", "WaremaCover", this);
             ESP_LOGCONFIG(TAG, "  Open Duration: %.1fs", this->open_duration_ / 1e3f);
             ESP_LOGCONFIG(TAG, "  Close Duration: %.1fs", this->close_duration_ / 1e3f);
+            ESP_LOGCONFIG(TAG, "  Opencode:  %s", this->opencode_.c_str());
+            ESP_LOGCONFIG(TAG, "  Closecode: %s", this->closecode_.c_str());
+            ESP_LOGCONFIG(TAG, "  Stopcode:  %s", this->stopcode_.c_str());
             ESP_LOGCONFIG(TAG, "  Devicecode 1: %s", this->devicecode1_.c_str());
             ESP_LOGCONFIG(TAG, "  Devicecode 2: %s", this->devicecode2_.c_str());
-            ESP_LOGCONFIG(TAG, "  Channelcode:  %s", this->channelcode_.c_str());
             ESP_LOGCONFIG(TAG, "  Command OPEN:  %s", this->get_command(WaremaCommandType::OPEN).c_str());
             ESP_LOGCONFIG(TAG, "  Command CLOSE: %s", this->get_command(WaremaCommandType::CLOSE).c_str());
             ESP_LOGCONFIG(TAG, "  Command STOP:  %s", this->get_command(WaremaCommandType::STOP).c_str());

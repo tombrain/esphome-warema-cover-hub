@@ -16,7 +16,9 @@ CONF_HUB_ID = 'warema_cover_hub_id'
 
 CONF_DEVICECODE1 = "devicecode1"
 CONF_DEVICECODE2 = "devicecode2"
-CONF_CHANNELCODE = "channelcode"
+CONF_OPENCODE = "opencode"
+CONF_CLOSECODE = "closecode"
+CONF_STOPCODE = "stopcode"
 
 warema_cover_hub_ns = cg.esphome_ns.namespace("warema_cover_hub")
 WaremaCover = warema_cover_hub_ns.class_("WaremaCover", cover.Cover, cg.Component)
@@ -30,24 +32,26 @@ def validate_binary_string(value, length):
 def validate_devicecode(value):
     return validate_binary_string(value, 9)
 
-def validate_channelcode(value):
-    return validate_binary_string(value, 7)
+def validate_functioncode(value):
+    return validate_binary_string(value, 14)
 
 CONFIG_SCHEMA = (cover.cover_schema(WaremaCover)
         .extend(
         {
-            cv.Required(CONF_HUB_ID): cv.use_id(WaremaCoverHub),  # Pflichtfeld gemacht
+            cv.Required(CONF_HUB_ID): cv.use_id(WaremaCoverHub),
             cv.Required(CONF_OPEN_DURATION): cv.positive_time_period_milliseconds,
             cv.Required(CONF_CLOSE_DURATION): cv.positive_time_period_milliseconds,
             cv.Required(CONF_DEVICECODE1): validate_devicecode,
             cv.Required(CONF_DEVICECODE2): validate_devicecode,
-            cv.Required(CONF_CHANNELCODE): validate_channelcode,
+            cv.Required(CONF_OPENCODE): validate_functioncode,
+            cv.Required(CONF_CLOSECODE): validate_functioncode,
+            cv.Required(CONF_STOPCODE): validate_functioncode,
         }
     ).extend(cv.COMPONENT_SCHEMA)
 )
 
 async def to_code(config):
-    hub = await cg.get_variable(config[CONF_HUB_ID])  # Replace yield with await
+    hub = await cg.get_variable(config[CONF_HUB_ID])
     var = cg.new_Pvariable(config[CONF_ID], hub)
     await cg.register_component(var, config)
     await cover.register_cover(var, config)
@@ -57,4 +61,6 @@ async def to_code(config):
     cg.add(var.set_close_duration(config[CONF_CLOSE_DURATION]))
     cg.add(var.set_devicecode1(config[CONF_DEVICECODE1]))
     cg.add(var.set_devicecode2(config[CONF_DEVICECODE2]))
-    cg.add(var.set_channelcode(config[CONF_CHANNELCODE]))
+    cg.add(var.set_opencode(config[CONF_OPENCODE]))
+    cg.add(var.set_closecode(config[CONF_CLOSECODE]))
+    cg.add(var.set_stopcode(config[CONF_STOPCODE]))
