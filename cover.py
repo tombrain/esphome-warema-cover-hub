@@ -16,9 +16,7 @@ CONF_HUB_ID = 'warema_cover_hub_id'
 
 CONF_DEVICECODE1 = "devicecode1"
 CONF_DEVICECODE2 = "devicecode2"
-CONF_OPENCODE = "opencode"
-CONF_CLOSECODE = "closecode"
-CONF_STOPCODE = "stopcode"
+CONF_COMMAND = "command"
 
 warema_cover_hub_ns = cg.esphome_ns.namespace("warema_cover_hub")
 WaremaCover = warema_cover_hub_ns.class_("WaremaCover", cover.Cover, cg.Component)
@@ -32,8 +30,8 @@ def validate_binary_string(value, length):
 def validate_devicecode(value):
     return validate_binary_string(value, 9)
 
-def validate_functioncode(value):
-    return validate_binary_string(value, 14)
+def validate_command(value):
+    return validate_binary_string(value, 3)
 
 CONFIG_SCHEMA = (cover.cover_schema(WaremaCover)
         .extend(
@@ -43,9 +41,7 @@ CONFIG_SCHEMA = (cover.cover_schema(WaremaCover)
             cv.Required(CONF_CLOSE_DURATION): cv.positive_time_period_milliseconds,
             cv.Required(CONF_DEVICECODE1): validate_devicecode,
             cv.Required(CONF_DEVICECODE2): validate_devicecode,
-            cv.Required(CONF_OPENCODE): validate_functioncode,
-            cv.Required(CONF_CLOSECODE): validate_functioncode,
-            cv.Required(CONF_STOPCODE): validate_functioncode,
+            cv.Required(CONF_COMMAND): validate_command,
         }
     ).extend(cv.COMPONENT_SCHEMA)
 )
@@ -61,6 +57,4 @@ async def to_code(config):
     cg.add(var.set_close_duration(config[CONF_CLOSE_DURATION]))
     cg.add(var.set_devicecode1(config[CONF_DEVICECODE1]))
     cg.add(var.set_devicecode2(config[CONF_DEVICECODE2]))
-    cg.add(var.set_opencode(config[CONF_OPENCODE]))
-    cg.add(var.set_closecode(config[CONF_CLOSECODE]))
-    cg.add(var.set_stopcode(config[CONF_STOPCODE]))
+    cg.add(var.set_command(config[CONF_COMMAND]))

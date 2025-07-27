@@ -25,9 +25,7 @@ namespace esphome
 
             void set_devicecode1(const std::string &devicecode1);
             void set_devicecode2(const std::string &devicecode2);
-            void set_opencode(const std::string &opencode);
-            void set_closecode(const std::string &closecode);
-            void set_stopcode(const std::string &stopcode);
+            void set_command(const std::string &command);
 
             cover::CoverTraits get_traits() override;
             cover::CoverOperation get_last_operation() const;
@@ -56,9 +54,7 @@ namespace esphome
             cover::CoverOperation last_operation_{cover::COVER_OPERATION_OPENING};
 
             // Device codes
-            std::string opencode_;
-            std::string closecode_;
-            std::string stopcode_;
+            std::string command_;
             std::string devicecode1_;
             std::string devicecode2_;
 

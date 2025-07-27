@@ -18,38 +18,43 @@ namespace esphome
         void WaremaCover::set_close_duration(uint32_t close_duration) { this->close_duration_ = close_duration; }
         void WaremaCover::set_devicecode1(const std::string &devicecode1) { this->devicecode1_ = devicecode1; }
         void WaremaCover::set_devicecode2(const std::string &devicecode2) { this->devicecode2_ = devicecode2; }
-        void WaremaCover::set_opencode(const std::string &opencode) { this->opencode_ = opencode; }
-        void WaremaCover::set_closecode(const std::string &closecode) { this->closecode_ = closecode; }
-        void WaremaCover::set_stopcode(const std::string &stopcode) { this->stopcode_ = stopcode; }
+        void WaremaCover::set_command(const std::string &command) { this->command_ = command; }
 
         // Getter
         cover::CoverOperation WaremaCover::get_last_operation() const { return this->last_operation_; }
 
         std::string WaremaCover::get_command(WaremaCommandType type) const
         {
-            // Compose the command: S{commandcode}S{devicecode1_}S{devicecode2_}S
-            std::string command;
-            command.reserve(1 + opencode_.size() + 1 + devicecode1_.size() + 1 + devicecode2_.size() + 1);
+            // Start bits for the command
+            std::string command{"S"};
+            command.reserve(36); // Reserve space for the command
 
-            command.push_back('S');
             switch (type)
             {
             case WaremaCommandType::OPEN:
-                command.append(opencode_);
+                command.append("01110100");
+                command.append(command_);
+                command.append("111");
                 break;
 
             case WaremaCommandType::CLOSE:
-                command.append(closecode_);
+                command.append("01110100");
+                command.append(command_);
+                command.append("110");
                 break;
 
             case WaremaCommandType::STOP:
-                command.append(stopcode_);
+                command.append("00110100");
+                command.append(command_);
+                command.append("001");
                 break;
             }
 
             command.push_back('S');
-            command.append(devicecode1_).push_back('S');
-            command.append(devicecode2_).push_back('S');
+            command.append(devicecode1_)
+                .push_back('S');
+            command.append(devicecode2_)
+                .push_back('S');
             return command;
         }
 
@@ -58,9 +63,7 @@ namespace esphome
             LOG_COVER("", "WaremaCover", this);
             ESP_LOGCONFIG(TAG, "  Open Duration: %.1fs", this->open_duration_ / 1e3f);
             ESP_LOGCONFIG(TAG, "  Close Duration: %.1fs", this->close_duration_ / 1e3f);
-            ESP_LOGCONFIG(TAG, "  Opencode:  %s", this->opencode_.c_str());
-            ESP_LOGCONFIG(TAG, "  Closecode: %s", this->closecode_.c_str());
-            ESP_LOGCONFIG(TAG, "  Stopcode:  %s", this->stopcode_.c_str());
+            ESP_LOGCONFIG(TAG, "  Command:    %s", this->command_.c_str());
             ESP_LOGCONFIG(TAG, "  Devicecode 1: %s", this->devicecode1_.c_str());
             ESP_LOGCONFIG(TAG, "  Devicecode 2: %s", this->devicecode2_.c_str());
             ESP_LOGCONFIG(TAG, "  Command OPEN:  %s", this->get_command(WaremaCommandType::OPEN).c_str());
@@ -235,15 +238,13 @@ namespace esphome
         void WaremaCover::on_open()
         {
             ESP_LOGD(TAG, "Cover is opening");
-
-            hub_->send_command(this->get_command(WaremaCommandType::OPEN));
+             hub_->send_command(this->get_command(WaremaCommandType::OPEN));
             this->last_operation_ = COVER_OPERATION_OPENING;
         }
 
         void WaremaCover::on_close()
         {
             ESP_LOGD(TAG, "Cover is closing");
-
             hub_->send_command(this->get_command(WaremaCommandType::CLOSE));
             this->last_operation_ = COVER_OPERATION_CLOSING;
         }
@@ -251,7 +252,6 @@ namespace esphome
         void WaremaCover::on_stop()
         {
             ESP_LOGD(TAG, "Cover is stopping");
-
             hub_->send_command(this->get_command(WaremaCommandType::STOP));
             this->last_operation_ = COVER_OPERATION_IDLE;
         }
