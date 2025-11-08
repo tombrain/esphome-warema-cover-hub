@@ -10,6 +10,15 @@ namespace esphome
         static const char *const TAG = "warema_cover_hub.cover";
         using namespace esphome::cover;
 
+        // Define constants
+        constexpr char START_BIT = 'S';
+        constexpr char OPEN_COMMAND_BITS[] = "01110100";
+        constexpr char CLOSE_COMMAND_BITS[] = "01110100";
+        constexpr char STOP_COMMAND_BITS[] = "00110100";
+        constexpr char OPEN_SUFFIX[] = "111";
+        constexpr char CLOSE_SUFFIX[] = "110";
+        constexpr char STOP_SUFFIX[] = "001";
+
         // Konstruktor
         WaremaCover::WaremaCover(WaremaCoverHub *hub) : hub_(hub) {}
 
@@ -26,35 +35,34 @@ namespace esphome
         std::string WaremaCover::get_command(WaremaCommandType type) const
         {
             // Start bits for the command
-            std::string command{"S"};
+            std::string command{START_BIT};
             command.reserve(36); // Reserve space for the command
 
             switch (type)
             {
             case WaremaCommandType::OPEN:
-                command.append("01110100");
+                command.append(OPEN_COMMAND_BITS);
                 command.append(command_);
-                command.append("111");
+                command.append(OPEN_SUFFIX);
                 break;
 
             case WaremaCommandType::CLOSE:
-                command.append("01110100");
+                command.append(CLOSE_COMMAND_BITS);
                 command.append(command_);
-                command.append("110");
+                command.append(CLOSE_SUFFIX);
                 break;
 
             case WaremaCommandType::STOP:
-                command.append("00110100");
+                command.append(STOP_COMMAND_BITS);
                 command.append(command_);
-                command.append("001");
+                command.append(STOP_SUFFIX);
                 break;
             }
 
-            command.push_back('S');
-            command.append(devicecode1_)
-                .push_back('S');
-            command.append(devicecode2_)
-                .push_back('S');
+            // Use constant for 'S'
+            command.push_back(START_BIT);
+            command.append(devicecode1_).push_back(START_BIT);
+            command.append(devicecode2_).push_back(START_BIT);
             return command;
         }
 
