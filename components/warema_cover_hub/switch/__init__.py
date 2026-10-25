@@ -11,8 +11,8 @@ from .. import (
     warema_cover_hub_ns,
 )
 
-ReceiveSwitch = warema_cover_hub_ns.class_(
-    "ReceiveSwitch",
+ShowCodesSwitch = warema_cover_hub_ns.class_(
+    "ShowCodesSwitch",
     switch.Switch,
     cg.Component,
     cg.Parented.template(WaremaCoverHub),
@@ -20,10 +20,10 @@ ReceiveSwitch = warema_cover_hub_ns.class_(
 
 CONFIG_SCHEMA = (
     switch.switch_schema(
-        ReceiveSwitch,
+        ShowCodesSwitch,
         default_restore_mode="RESTORE_DEFAULT_ON",
         entity_category=ENTITY_CATEGORY_CONFIG,
-        icon="mdi:radio-tower",
+        icon="mdi:eye",
     )
     .extend({cv.GenerateID(CONF_WAREMA_COVER_HUB_ID): cv.use_id(WaremaCoverHub)})
     .extend(cv.COMPONENT_SCHEMA)

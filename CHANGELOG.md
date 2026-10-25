@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cover option `members` for channels that move several blinds, e.g. "all": the members
   follow the channel, from Home Assistant or the remote, without sending anything.
 
+### Changed
+
+- The switch only shows or hides received codes in the log and the text sensor. Events and
+  covers following the remote work regardless of it. Before, it turned off all receiving.
+
 ## [1.2.0] - 2026-10-25
 
 ### Added

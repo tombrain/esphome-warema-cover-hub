@@ -138,9 +138,9 @@ cover:
 
 ### Switch: `platform: warema_cover_hub`
 
-Turns decoding of received telegrams on and off from Home Assistant. On by default, the state
-is restored after a reboot. Requires `receiver_id` on the hub. The receiver itself keeps
-listening; the switch only stops decoding and logging.
+Shows or hides received codes in the log and the text sensor, e.g. turned on only while
+reading new codes. On by default, the state is restored after a reboot. Requires
+`receiver_id` on the hub. Events and covers following the remote work regardless of it.
 
 ### Text sensor: `platform: warema_cover_hub`
 
@@ -225,7 +225,7 @@ warema_cover_hub:
 # Optional: control and show it in Home Assistant
 switch:
   - platform: warema_cover_hub
-    name: "Receive Warema codes"
+    name: "Show Warema codes"
 
 text_sensor:
   - platform: warema_cover_hub

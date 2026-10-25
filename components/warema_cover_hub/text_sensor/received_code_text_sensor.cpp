@@ -8,8 +8,10 @@ namespace warema_cover_hub {
 static const char *const TAG = "warema_cover_hub.text_sensor";
 
 void ReceivedCodeTextSensor::setup() {
-  this->parent_->add_on_telegram_callback(
-      [this](const std::string & /*telegram*/, const std::string &description) { this->publish_state(description); });
+  this->parent_->add_on_telegram_callback([this](const std::string & /*telegram*/, const std::string &description) {
+    if (this->parent_->is_showing_codes())
+      this->publish_state(description);
+  });
 }
 
 void ReceivedCodeTextSensor::dump_config() { LOG_TEXT_SENSOR("", "Warema Received Code", this); }

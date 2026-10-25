@@ -74,8 +74,6 @@ uint32_t WaremaCoverHub::transmit_(const std::string &telegram) {
 }
 
 bool WaremaCoverHub::on_receive(remote_base::RemoteReceiveData data) {
-  if (!this->receiving_)
-    return false;
   if (!this->queue_.empty() || millis() - this->last_transmit_time_ < this->busy_time_ + RECEIVE_HOLDOFF_MS)
     return false;
 
@@ -101,7 +99,11 @@ void WaremaCoverHub::handle_telegram_(const std::string &telegram) {
     return;
 
   const std::string description = this->describe_received_(telegram);
-  ESP_LOGI(TAG, "Received %s", description.c_str());
+  if (this->show_codes_) {
+    ESP_LOGI(TAG, "Received %s", description.c_str());
+  } else {
+    ESP_LOGV(TAG, "Received %s", description.c_str());
+  }
   ESP_LOGD(TAG, "Received telegram '%s'", telegram.c_str());
   this->telegram_callback_.call(telegram, description);
 }

@@ -9,8 +9,8 @@
 namespace esphome {
 namespace warema_cover_hub {
 
-/// Turns decoding of received telegrams on and off.
-class ReceiveSwitch : public switch_::Switch, public Component, public Parented<WaremaCoverHub> {
+/// Shows or hides received codes in the log and the text sensor, for reading new codes.
+class ShowCodesSwitch : public switch_::Switch, public Component, public Parented<WaremaCoverHub> {
  public:
   void setup() override;
   void dump_config() override;

@@ -141,9 +141,9 @@ cover:
 
 ### Schalter: `platform: warema_cover_hub`
 
-Schaltet das Dekodieren empfangener Telegramme in Home Assistant ein und aus. Standardmäßig an,
-der Zustand bleibt nach einem Neustart erhalten. Braucht `receiver_id` am Hub. Der Empfänger
-selbst lauscht weiter, der Schalter beendet nur das Dekodieren und Loggen.
+Blendet empfangene Codes in Log und Textsensor ein und aus, z. B. nur eingeschaltet, solange du
+neue Codes ausliest. Standardmäßig an, der Zustand bleibt nach einem Neustart erhalten. Braucht
+`receiver_id` am Hub. Events und das Mitlaufen der Covers funktionieren unabhängig davon.
 
 ### Textsensor: `platform: warema_cover_hub`
 
@@ -230,7 +230,7 @@ warema_cover_hub:
 # Optional: in Home Assistant schalten und anzeigen
 switch:
   - platform: warema_cover_hub
-    name: "Warema Codes empfangen"
+    name: "Warema Codes anzeigen"
 
 text_sensor:
   - platform: warema_cover_hub

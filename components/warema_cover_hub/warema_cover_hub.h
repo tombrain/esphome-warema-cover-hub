@@ -31,8 +31,10 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
 
   void set_transmitter(remote_base::RemoteTransmitterBase *transmitter) { this->transmitter_ = transmitter; }
   void set_has_receiver(bool has_receiver) { this->has_receiver_ = has_receiver; }
-  /// Turns decoding of received telegrams on and off, e.g. from a switch.
-  void set_receiving(bool receiving) { this->receiving_ = receiving; }
+  /// Shows received codes in the log and the text sensor, e.g. switched for reading new codes.
+  /// Events and covers following the remote work regardless.
+  void set_show_codes(bool show_codes) { this->show_codes_ = show_codes; }
+  bool is_showing_codes() const { return this->show_codes_; }
   void set_number_of_transmissions(uint8_t number_of_transmissions) {
     this->number_of_transmissions_ = number_of_transmissions;
   }
@@ -59,7 +61,7 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
 
   remote_base::RemoteTransmitterBase *transmitter_{nullptr};
   bool has_receiver_{false};
-  bool receiving_{true};
+  bool show_codes_{true};
   uint8_t number_of_transmissions_{3};
   std::vector<WaremaCover *> covers_{};
   TelegramQueue queue_;
