@@ -62,6 +62,28 @@ static void test_parse() {
   CHECK(!parse_command_type("S0111", &type));
 }
 
+// Telegrams of all keys of a real remote (channel 3 of "Wohnzimmer")
+static void test_real_keys() {
+  const struct {
+    const char *telegram;
+    CommandType type;
+  } keys[] = {
+      {"S01110100101111S001101001S110010110S", CommandType::OPEN},
+      {"S01110100101110S001101001S110010110S", CommandType::CLOSE},
+      {"S00110100101001S001101001S110010110S", CommandType::STOP},
+      {"S01110100101001S001101001S110010110S", CommandType::FUNCTION_A},
+      {"S01110100101000S001101001S110010110S", CommandType::FUNCTION_B},
+      {"S01110100101101S001101001S110010110S", CommandType::FUNCTION_C},
+  };
+  for (const auto &key : keys) {
+    CommandType type;
+    CHECK(parse_command_type(key.telegram, &type) && type == key.type);
+    CHECK(build_telegram(key.type, "101", "001101001", "110010110") == key.telegram);
+  }
+  CHECK(describe_telegram(keys[3].telegram) ==
+        "FUNCTION_A, command: 101, devicecode1: 001101001, devicecode2: 110010110");
+}
+
 static void test_describe() {
   CHECK(describe_telegram(build_telegram(CommandType::STOP, "110", "101000110", "011001010")) ==
         "STOP, command: 110, devicecode1: 101000110, devicecode2: 011001010");
@@ -254,6 +276,7 @@ int main() {
   test_known_telegram();
   test_parse();
   test_describe();
+  test_real_keys();
   test_round_trip();
   test_jitter();
   test_repetitions_and_noise();

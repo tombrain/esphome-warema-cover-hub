@@ -170,8 +170,9 @@ Textsensor):
 für jeden Rollladen bzw. jeden Kanal der Fernbedienung. Ein Kanal, der mehrere Rollläden
 gleichzeitig fährt (z. B. „alle“), hat einen eigenen `command` und wird ein eigenes Cover.
 
-Steht im Log `UNKNOWN` statt `OPEN`, `CLOSE` oder `STOP`, handelt es sich um einen Befehl, den
-diese Komponente nicht sendet. Eröffne dann bitte ein Issue mit dem Telegramm aus dem Debug-Log.
+Neben `OPEN`, `CLOSE` und `STOP` werden die Funktionstasten A, B und C der Fernbedienung als
+`FUNCTION_A` bis `FUNCTION_C` angezeigt. `UNKNOWN` steht für eine Taste, die diese Komponente
+noch nicht kennt. Eröffne dann bitte ein Issue mit dem Telegramm aus dem Debug-Log.
 
 ### Protokoll
 

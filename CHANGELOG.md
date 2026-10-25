@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A hub without transmitter works as a receiver-only sniffer; `transmitter_id` is optional now.
 - Switch platform to turn decoding of received telegrams on and off from Home Assistant.
 - Text sensor platform showing the last received code in Home Assistant.
+- The function keys A, B and C of the remote are recognized (`FUNCTION_A` to `FUNCTION_C`).
 - Config check: a receiver with `idle` below 7 ms is rejected, it would cut the telegrams at
   their syncs.
 - Cover option `reverse_delay` (default 1 s), the pause before reversing a moving cover.

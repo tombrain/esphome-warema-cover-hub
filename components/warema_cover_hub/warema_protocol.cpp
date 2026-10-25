@@ -19,6 +19,12 @@ const char *command_type_to_str(CommandType type) {
       return "CLOSE";
     case CommandType::STOP:
       return "STOP";
+    case CommandType::FUNCTION_A:
+      return "FUNCTION_A";
+    case CommandType::FUNCTION_B:
+      return "FUNCTION_B";
+    case CommandType::FUNCTION_C:
+      return "FUNCTION_C";
     default:
       return "UNKNOWN";
   }
@@ -40,6 +46,15 @@ std::string build_telegram(CommandType type, const std::string &command, const s
     case CommandType::STOP:
       telegram.append(STOP_COMMAND_BITS).append(command).append(STOP_SUFFIX);
       break;
+    case CommandType::FUNCTION_A:
+      telegram.append(FUNCTION_COMMAND_BITS).append(command).append(FUNCTION_A_SUFFIX);
+      break;
+    case CommandType::FUNCTION_B:
+      telegram.append(FUNCTION_COMMAND_BITS).append(command).append(FUNCTION_B_SUFFIX);
+      break;
+    case CommandType::FUNCTION_C:
+      telegram.append(FUNCTION_COMMAND_BITS).append(command).append(FUNCTION_C_SUFFIX);
+      break;
   }
 
   telegram.push_back(SYNC);
@@ -59,6 +74,12 @@ bool parse_command_type(const std::string &telegram, CommandType *type) {
     *type = CommandType::CLOSE;
   } else if (bits == STOP_COMMAND_BITS && suffix == STOP_SUFFIX) {
     *type = CommandType::STOP;
+  } else if (bits == FUNCTION_COMMAND_BITS && suffix == FUNCTION_A_SUFFIX) {
+    *type = CommandType::FUNCTION_A;
+  } else if (bits == FUNCTION_COMMAND_BITS && suffix == FUNCTION_B_SUFFIX) {
+    *type = CommandType::FUNCTION_B;
+  } else if (bits == FUNCTION_COMMAND_BITS && suffix == FUNCTION_C_SUFFIX) {
+    *type = CommandType::FUNCTION_C;
   } else {
     return false;
   }

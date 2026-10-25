@@ -166,8 +166,9 @@ Copy `command`, `devicecode1` and `devicecode2` into the cover configuration. Re
 for every blind or channel of the remote. A channel that moves several blinds at once
 (e.g. "all") has its own `command` and becomes a cover of its own.
 
-`UNKNOWN` instead of `OPEN`, `CLOSE` or `STOP` means a command this component does not
-send. Please open an issue with the telegram from the debug log.
+Besides `OPEN`, `CLOSE` and `STOP`, the function keys A, B and C of the remote are shown as
+`FUNCTION_A` to `FUNCTION_C`. `UNKNOWN` means a key this component does not know yet. Please
+open an issue with the telegram from the debug log.
 
 ### Protocol
 
