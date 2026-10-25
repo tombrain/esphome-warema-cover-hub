@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, to catch breaking changes in new ESPHome releases
+    - cron: "0 4 * * 1"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      # Same versions as ESPHome's .pre-commit-config.yaml
+      - run: pip install ruff==0.16.10 clang-format==13.0.1
+      - run: ruff format --check components
+      - run: ruff check components
+      - run: clang-format --dry-run --Werror components/warema_cover_hub/*.cpp components/warema_cover_hub/*.h
+
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test: [esp32-idf, esp8266-ard]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.platformio
+          key: platformio-${{ matrix.test }}-${{ github.run_id }}
+          restore-keys: platformio-${{ matrix.test }}-
+      - run: pip install esphome
+      - run: esphome version
+      - run: esphome compile tests/test.${{ matrix.test }}.yaml

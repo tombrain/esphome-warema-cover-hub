@@ -1,0 +1,40 @@
+esphome:
+  name: test-esp8266-ard
+
+esp8266:
+  board: d1_mini
+
+logger:
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [warema_cover_hub]
+
+remote_transmitter:
+  id: rf_transmitter
+  pin: D1
+  carrier_duty_percent: 100%
+
+warema_cover_hub:
+  id: warema_hub
+  transmitter_id: rf_transmitter
+  number_of_transmissions: 3
+
+cover:
+  - platform: warema_cover_hub
+    name: "Cover 1"
+    command: "111"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
+    open_duration: 24s
+    close_duration: 24s
+
+  - platform: warema_cover_hub
+    name: "Cover 2"
+    command: "110"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
+    open_duration: 16s
+    close_duration: 18s
