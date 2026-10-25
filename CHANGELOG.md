@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-25
+
 ### Added
 
 - Decoding of telegrams from the original remote with an optional `remote_receiver`
@@ -19,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cover option `reverse_delay` (default 1 s), the pause before reversing a moving cover.
 - Own transmissions are recognized by content, not only by timing, so their echo is not
   reported as received even when the loop is delayed after sending.
+- README: reading the codes, recommended receiver settings, setup photo, credits,
+  German translation.
 
 ### Fixed
 
@@ -30,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Toggle after a STOP reverses the last movement. Before, it always closed the cover.
 - The send queue is limited to 32 telegrams, so a flood of commands cannot exhaust the memory.
 - `open_duration` and `close_duration` of 0 are rejected; they made the computed position invalid.
-- README: reading the codes, setup photo, credits, German translation.
 
 ## [1.0.1] - 2026-10-25
 
@@ -69,7 +72,8 @@ First release as an ESPHome external component.
 
 First tagged version, before the restructuring.
 
-[Unreleased]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/tombrain/esphome-warema-cover-hub/releases/tag/v0.1.0
