@@ -24,7 +24,7 @@ cover:
   - platform: warema_cover_hub
     name: "Cover Bathroom"
     command: "111"
-    devicecode1: "000011100"
-    devicecode2: "000011101"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
     open_duration: 24s
     close_duration: 24s

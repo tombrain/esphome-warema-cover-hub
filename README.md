@@ -37,8 +37,8 @@ cover:
   - platform: warema_cover_hub
     name: "Cover Bathroom"
     command: "111"
-    devicecode1: "000011100"
-    devicecode2: "000011101"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
     open_duration: 24s
     close_duration: 24s
 ```
@@ -62,7 +62,7 @@ first transmission before any telegram is repeated.
 |---|---|---|
 | `warema_cover_hub_id` | no | ID of the hub. Needed only if you configure more than one hub. |
 | `command` | yes | 3-bit channel code of the blind, e.g. `"111"`. |
-| `devicecode1` | yes | First 9-bit device code, e.g. `"000011100"`. |
+| `devicecode1` | yes | First 9-bit device code, e.g. `"101010010"`. |
 | `devicecode2` | yes | Second 9-bit device code. |
 | `open_duration` | yes | Time to fully open. |
 | `close_duration` | yes | Time to fully close. |
