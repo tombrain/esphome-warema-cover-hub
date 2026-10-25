@@ -144,12 +144,13 @@ cover:
 Blendet empfangene Codes in Log und Textsensor ein und aus, z. B. nur eingeschaltet, solange du
 neue Codes ausliest. Standardmäßig an, der Zustand bleibt nach einem Neustart erhalten. Braucht
 `receiver_id` am Hub. Events und das Mitlaufen der Covers funktionieren unabhängig davon.
+Ohne `name` heißt er „Show Warema codes“.
 
 ### Textsensor: `platform: warema_cover_hub`
 
 Zeigt das zuletzt empfangene Telegramm an, z. B.
 `OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011 (cover: Bad)`.
-Braucht `receiver_id` am Hub.
+Braucht `receiver_id` am Hub. Ohne `name` heißt er „Received Warema code“.
 
 Beide kennen `warema_cover_hub_id` (nur bei mehr als einem Hub nötig) und die Basis-Optionen für
 [Schalter](https://esphome.io/components/switch/#base-switch-configuration) bzw.
@@ -230,11 +231,11 @@ warema_cover_hub:
 # Optional: in Home Assistant schalten und anzeigen
 switch:
   - platform: warema_cover_hub
-    name: "Warema Codes anzeigen"
+    name: "Warema Codes anzeigen"     # optional, Standard: "Show Warema codes"
 
 text_sensor:
   - platform: warema_cover_hub
-    name: "Empfangener Warema Code"
+    name: "Empfangener Warema Code"   # optional, Standard: "Received Warema code"
 ```
 
 Drücke in der Nähe des Empfängers eine Taste der Fernbedienung und beobachte das Log (oder den

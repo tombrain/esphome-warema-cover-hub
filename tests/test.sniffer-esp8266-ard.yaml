@@ -24,11 +24,9 @@ warema_cover_hub:
 
 switch:
   - platform: warema_cover_hub
-    name: "Show Warema codes"
 
 text_sensor:
   - platform: warema_cover_hub
-    name: "Received Warema code"
 
 event:
   - platform: warema_cover_hub

@@ -2,7 +2,7 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 import esphome.final_validate as fv
 from esphome.components import switch
-from esphome.const import ENTITY_CATEGORY_CONFIG
+from esphome.const import CONF_NAME, ENTITY_CATEGORY_CONFIG
 
 from .. import (
     CONF_RECEIVER_ID,
@@ -25,7 +25,12 @@ CONFIG_SCHEMA = (
         entity_category=ENTITY_CATEGORY_CONFIG,
         icon="mdi:eye",
     )
-    .extend({cv.GenerateID(CONF_WAREMA_COVER_HUB_ID): cv.use_id(WaremaCoverHub)})
+    .extend(
+        {
+            cv.GenerateID(CONF_WAREMA_COVER_HUB_ID): cv.use_id(WaremaCoverHub),
+            cv.Optional(CONF_NAME, default="Show Warema codes"): cv.string,
+        }
+    )
     .extend(cv.COMPONENT_SCHEMA)
 )
 

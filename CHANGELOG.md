@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cover option `members` for channels that move several blinds, e.g. "all": the members
   follow the channel, from Home Assistant or the remote, without sending anything.
 
+- Default names for the switch ("Show Warema codes") and the text sensor ("Received Warema
+  code"), so `name` can be left out.
+
 ### Changed
 
 - The switch only shows or hides received codes in the log and the text sensor. Events and

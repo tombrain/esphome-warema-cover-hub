@@ -2,6 +2,7 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 import esphome.final_validate as fv
 from esphome.components import text_sensor
+from esphome.const import CONF_NAME
 
 from .. import (
     CONF_RECEIVER_ID,
@@ -22,7 +23,12 @@ CONFIG_SCHEMA = (
         ReceivedCodeTextSensor,
         icon="mdi:remote",
     )
-    .extend({cv.GenerateID(CONF_WAREMA_COVER_HUB_ID): cv.use_id(WaremaCoverHub)})
+    .extend(
+        {
+            cv.GenerateID(CONF_WAREMA_COVER_HUB_ID): cv.use_id(WaremaCoverHub),
+            cv.Optional(CONF_NAME, default="Received Warema code"): cv.string,
+        }
+    )
     .extend(cv.COMPONENT_SCHEMA)
 )
 

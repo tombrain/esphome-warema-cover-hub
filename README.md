@@ -141,12 +141,13 @@ cover:
 Shows or hides received codes in the log and the text sensor, e.g. turned on only while
 reading new codes. On by default, the state is restored after a reboot. Requires
 `receiver_id` on the hub. Events and covers following the remote work regardless of it.
+Named "Show Warema codes" unless you set a `name`.
 
 ### Text sensor: `platform: warema_cover_hub`
 
 Shows the last received telegram, e.g.
 `OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011 (cover: Bathroom)`.
-Requires `receiver_id` on the hub.
+Requires `receiver_id` on the hub. Named "Received Warema code" unless you set a `name`.
 
 Both take `warema_cover_hub_id` (needed only with more than one hub) and the base
 [switch](https://esphome.io/components/switch/#base-switch-configuration) or
@@ -224,12 +225,10 @@ warema_cover_hub:
 
 # Optional: control and show it in Home Assistant
 switch:
-  - platform: warema_cover_hub
-    name: "Show Warema codes"
+  - platform: warema_cover_hub    # named "Show Warema codes" unless you set a name
 
 text_sensor:
-  - platform: warema_cover_hub
-    name: "Received Warema code"
+  - platform: warema_cover_hub    # named "Received Warema code" unless you set a name
 ```
 
 Press a button on the remote near the receiver and watch the log (or the text sensor):
