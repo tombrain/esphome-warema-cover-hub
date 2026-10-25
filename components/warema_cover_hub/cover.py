@@ -19,6 +19,13 @@ WaremaCover = warema_cover_hub_ns.class_(
 )
 
 
+# The position is computed by dividing by these, so they must not be 0
+DURATION_SCHEMA = cv.All(
+    cv.positive_time_period_milliseconds,
+    cv.Range(min=cv.TimePeriod(milliseconds=1)),
+)
+
+
 def validate_binary_string(length):
     def validator(value):
         value = cv.string(value)
@@ -36,8 +43,8 @@ CONFIG_SCHEMA = (
     .extend(
         {
             cv.GenerateID(CONF_WAREMA_COVER_HUB_ID): cv.use_id(WaremaCoverHub),
-            cv.Required(CONF_OPEN_DURATION): cv.positive_time_period_milliseconds,
-            cv.Required(CONF_CLOSE_DURATION): cv.positive_time_period_milliseconds,
+            cv.Required(CONF_OPEN_DURATION): DURATION_SCHEMA,
+            cv.Required(CONF_CLOSE_DURATION): DURATION_SCHEMA,
             cv.Required(CONF_DEVICECODE1): validate_binary_string(9),
             cv.Required(CONF_DEVICECODE2): validate_binary_string(9),
             cv.Required(CONF_COMMAND): validate_binary_string(3),
