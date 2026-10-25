@@ -77,7 +77,7 @@ A complete example is in [example.yaml](example.yaml).
 |---|---|---|---|
 | `id` | no | | ID of the hub. Needed only if you configure more than one hub. |
 | `transmitter_id` | no* | | ID of the `remote_transmitter` to send with. |
-| `receiver_id` | no* | | ID of a `remote_receiver`. Received telegrams are logged, see [Finding the codes](#finding-the-codes). |
+| `receiver_id` | no* | | ID of a `remote_receiver`. Received telegrams are logged, see [Finding the codes](#finding-the-codes). Own transmissions are filtered out. |
 | `number_of_transmissions` | no | `3` | How often each telegram is sent (1–10). |
 
 \* At least one of `transmitter_id` and `receiver_id` is required.

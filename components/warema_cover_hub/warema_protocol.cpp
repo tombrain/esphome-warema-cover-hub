@@ -184,5 +184,27 @@ std::vector<std::string> decode_telegrams(const std::vector<int32_t> &timings) {
   return telegrams;
 }
 
+void EchoFilter::add_sent(const std::string &telegram, uint32_t now) {
+  // Drop expired entries and an older entry of the same telegram
+  for (auto it = this->sent_.begin(); it != this->sent_.end();) {
+    if (now - it->time >= ECHO_WINDOW_MS || it->telegram == telegram) {
+      it = this->sent_.erase(it);
+    } else {
+      ++it;
+    }
+  }
+  if (this->sent_.size() >= MAX_ENTRIES)
+    this->sent_.erase(this->sent_.begin());
+  this->sent_.push_back({telegram, now});
+}
+
+bool EchoFilter::is_echo(const std::string &telegram, uint32_t now) const {
+  for (const auto &entry : this->sent_) {
+    if (entry.telegram == telegram && now - entry.time < ECHO_WINDOW_MS)
+      return true;
+  }
+  return false;
+}
+
 }  // namespace warema_cover_hub
 }  // namespace esphome

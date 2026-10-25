@@ -118,6 +118,36 @@ static void test_incomplete() {
   CHECK(decode_telegrams({}).empty());
 }
 
+static void test_echo_filter() {
+  const std::string open = build_telegram(CommandType::OPEN, "111", "010001011", "010001100");
+  const std::string stop = build_telegram(CommandType::STOP, "111", "010001011", "010001100");
+
+  EchoFilter filter;
+  CHECK(!filter.is_echo(open, 1000));
+  filter.add_sent(open, 1000);
+  CHECK(filter.is_echo(open, 1000));
+  CHECK(filter.is_echo(open, 2999));
+  CHECK(!filter.is_echo(open, 3000));
+  CHECK(!filter.is_echo(stop, 1500));  // another button on the remote is no echo
+
+  // Every repetition restarts the window
+  filter.add_sent(open, 2500);
+  CHECK(filter.is_echo(open, 4000));
+
+  // millis() wraps around after ~49 days
+  EchoFilter wrapped;
+  wrapped.add_sent(open, 0xFFFFFF00u);
+  CHECK(wrapped.is_echo(open, 0x00000100u));
+  CHECK(!wrapped.is_echo(open, 0x00000800u));
+
+  // The oldest entry is dropped when full
+  EchoFilter full;
+  for (uint32_t i = 0; i <= EchoFilter::MAX_ENTRIES; i++)
+    full.add_sent(build_telegram(CommandType::OPEN, "111", random_bits(9), "000000000"), 100 + i);
+  full.add_sent(stop, 200);
+  CHECK(full.is_echo(stop, 300));
+}
+
 int main() {
   test_known_telegram();
   test_parse();
@@ -126,6 +156,7 @@ int main() {
   test_jitter();
   test_repetitions_and_noise();
   test_incomplete();
+  test_echo_filter();
   if (failures == 0)
     std::printf("All tests passed\n");
   return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

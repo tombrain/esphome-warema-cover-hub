@@ -78,7 +78,7 @@ Ein vollständiges Beispiel findest du in [example.yaml](example.yaml).
 |---|---|---|---|
 | `id` | nein | | ID des Hubs. Nur nötig, wenn du mehr als einen Hub konfigurierst. |
 | `transmitter_id` | nein* | | ID des `remote_transmitter`, über den gesendet wird. |
-| `receiver_id` | nein* | | ID eines `remote_receiver`. Empfangene Telegramme werden geloggt, siehe [Codes auslesen](#codes-auslesen). |
+| `receiver_id` | nein* | | ID eines `remote_receiver`. Empfangene Telegramme werden geloggt, siehe [Codes auslesen](#codes-auslesen). Eigene Sendungen werden herausgefiltert. |
 | `number_of_transmissions` | nein | `3` | Wie oft jedes Telegramm gesendet wird (1–10). |
 
 \* Mindestens eine der Optionen `transmitter_id` und `receiver_id` ist nötig.

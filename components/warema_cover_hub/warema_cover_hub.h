@@ -65,6 +65,7 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   uint32_t busy_time_{0};
   std::string last_received_telegram_;
   uint32_t last_received_time_{0};
+  EchoFilter echo_filter_;
   CallbackManager<void(const std::string &)> telegram_callback_;
 };
 

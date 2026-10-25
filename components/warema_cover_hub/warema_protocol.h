@@ -42,5 +42,25 @@ std::vector<int32_t> encode_telegram(const std::string &telegram);
 /// Finds all complete telegrams in raw timings.
 std::vector<std::string> decode_telegrams(const std::vector<int32_t> &timings);
 
+/// Recognizes received telegrams that are the echo of our own transmissions.
+///
+/// A received telegram is an echo if it equals a telegram sent within the last
+/// ECHO_WINDOW_MS. Times are millis() values, wraparound is handled.
+class EchoFilter {
+ public:
+  static constexpr uint32_t ECHO_WINDOW_MS = 2000;
+  static constexpr size_t MAX_ENTRIES = 8;
+
+  void add_sent(const std::string &telegram, uint32_t now);
+  bool is_echo(const std::string &telegram, uint32_t now) const;
+
+ protected:
+  struct Entry {
+    std::string telegram;
+    uint32_t time;
+  };
+  std::vector<Entry> sent_;
+};
+
 }  // namespace warema_cover_hub
 }  // namespace esphome

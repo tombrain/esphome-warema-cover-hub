@@ -40,6 +40,7 @@ void WaremaCoverHub::loop() {
   ESP_LOGV(TAG, "Transmitting '%s' (%u left)", entry.telegram.c_str(), entry.remaining_transmissions - 1);
   const uint32_t duration_us = this->transmit_(entry.telegram);
   this->last_transmit_time_ = now;
+  this->echo_filter_.add_sent(entry.telegram, now);
   this->busy_time_ = (duration_us + 999) / 1000 + TRANSMIT_GAP_MS;
 
   if (--entry.remaining_transmissions > 0)
@@ -87,6 +88,12 @@ bool WaremaCoverHub::on_receive(remote_base::RemoteReceiveData data) {
 
 void WaremaCoverHub::handle_telegram_(const std::string &telegram) {
   const uint32_t now = millis();
+  // Our own transmission, received late (e.g. the loop was blocked after sending)
+  if (this->echo_filter_.is_echo(telegram, now)) {
+    ESP_LOGV(TAG, "Ignoring echo of own telegram '%s'", telegram.c_str());
+    return;
+  }
+
   const bool repeated =
       telegram == this->last_received_telegram_ && now - this->last_received_time_ < DUPLICATE_WINDOW_MS;
   this->last_received_telegram_ = telegram;
