@@ -42,6 +42,7 @@ cover:
     close_duration: 24s
 
   - platform: warema_cover_hub
+    id: cover_2
     name: "Cover 2"
     follow_remote: false
     command: "110"
@@ -49,6 +50,16 @@ cover:
     devicecode2: "101010011"
     open_duration: 16s
     close_duration: 18s
+
+  - platform: warema_cover_hub
+    id: cover_all
+    name: "All covers"
+    command: "011"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
+    open_duration: 24s
+    close_duration: 24s
+    members: [cover_1, cover_2]
 
 switch:
   - platform: warema_cover_hub

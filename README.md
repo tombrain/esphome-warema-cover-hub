@@ -98,6 +98,7 @@ pending repetitions, so a STOP is never followed by a leftover OPEN.
 | `close_duration` | yes | Time to fully close. |
 | `reverse_delay` | no | Pause before reversing a moving cover, default `1s`. See below. |
 | `follow_remote` | no | Track keys pressed on the original remote, default `true`. See below. |
+| `members` | no | IDs of the covers this channel moves too, e.g. for an "all" channel. See below. |
 
 Plus all [base cover options](https://esphome.io/components/cover/#base-cover-configuration).
 
@@ -113,6 +114,27 @@ state in Home Assistant stays right: UP and DOWN start it, the opposite key or S
 like the motor does. Nothing is sent for this. Pending repetitions of an own command for the
 cover are dropped, so they cannot override the remote. Set `follow_remote: false` to turn
 this off for a cover.
+
+A channel that moves several blinds, e.g. "all" on the remote, is a cover with `members`.
+When it moves, from Home Assistant or the remote, its members follow without sending
+anything. A cover can be a member of several channels; groups cannot be nested.
+
+```yaml
+cover:
+  - platform: warema_cover_hub
+    id: living_1
+    name: "Living room 1"
+    # ...
+  - platform: warema_cover_hub
+    id: living_2
+    name: "Living room 2"
+    # ...
+  - platform: warema_cover_hub
+    name: "Living room all"
+    command: "011"
+    # ...
+    members: [living_1, living_2]
+```
 
 ### Switch: `platform: warema_cover_hub`
 

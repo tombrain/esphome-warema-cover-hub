@@ -20,6 +20,8 @@ void WaremaCover::dump_config() {
   ESP_LOGCONFIG(TAG, "  Close Duration: %.1fs", this->close_duration_ / 1e3f);
   ESP_LOGCONFIG(TAG, "  Reverse Delay: %.1fs", this->reverse_delay_ / 1e3f);
   ESP_LOGCONFIG(TAG, "  Follow Remote: %s", YESNO(this->follow_remote_));
+  for (auto *member : this->members_)
+    ESP_LOGCONFIG(TAG, "  Member: '%s'", member->get_name().c_str());
   ESP_LOGCONFIG(TAG, "  Command: %s", this->command_.c_str());
   ESP_LOGCONFIG(TAG, "  Devicecode 1: %s", this->devicecode1_.c_str());
   ESP_LOGCONFIG(TAG, "  Devicecode 2: %s", this->devicecode2_.c_str());
@@ -173,6 +175,15 @@ void WaremaCover::start_direction_(CoverOperation dir) {
     this->last_operation_ = dir;
   this->current_operation = dir;
   this->last_recompute_time_ = millis();
+
+  this->notify_members_(dir == COVER_OPERATION_IDLE      ? CommandType::STOP
+                        : dir == COVER_OPERATION_OPENING ? CommandType::OPEN
+                                                         : CommandType::CLOSE);
+}
+
+void WaremaCover::notify_members_(CommandType type) {
+  for (auto *member : this->members_)
+    member->follow_command(type);
 }
 
 void WaremaCover::follow_command(CommandType type) {
@@ -194,6 +205,8 @@ void WaremaCover::follow_command(CommandType type) {
   // The motor got a newer command: our pending repetitions and a pending reverse would override it
   this->parent_->cancel_pending(this->address_telegram());
   this->reverse_direction_ = COVER_OPERATION_IDLE;
+  // The members' motors got it too, whatever state this group is in
+  this->notify_members_(type);
 
   CoverOperation next = dir;
   if (dir != COVER_OPERATION_IDLE && this->current_operation != COVER_OPERATION_IDLE)

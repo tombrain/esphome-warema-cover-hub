@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
@@ -26,6 +27,8 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   void set_command(const std::string &command) { this->command_ = command; }
   void set_reverse_delay(uint32_t reverse_delay) { this->reverse_delay_ = reverse_delay; }
   void set_follow_remote(bool follow_remote) { this->follow_remote_ = follow_remote; }
+  /// Makes this cover a group channel that also moves the member.
+  void add_member(WaremaCover *member) { this->members_.push_back(member); }
 
   cover::CoverTraits get_traits() override;
 
@@ -44,6 +47,7 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   void start_direction_(cover::CoverOperation dir);
   void finish_reverse_();
   void recompute_position_();
+  void notify_members_(CommandType type);
   std::string build_telegram_(CommandType type) const;
 
   uint32_t open_duration_{0};
@@ -66,6 +70,7 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   uint32_t reverse_stop_sent_time_{0};
 
   bool follow_remote_{true};
+  std::vector<WaremaCover *> members_{};
 
   std::string command_;
   std::string devicecode1_;

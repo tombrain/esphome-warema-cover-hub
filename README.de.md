@@ -100,6 +100,7 @@ OPEN.
 | `close_duration` | ja | Zeit zum vollständigen Schließen. |
 | `reverse_delay` | nein | Pause vor dem Umkehren eines fahrenden Covers, Standard `1s`. Siehe unten. |
 | `follow_remote` | nein | Tastendrücke der Original-Fernbedienung nachverfolgen, Standard `true`. Siehe unten. |
+| `members` | nein | IDs der Covers, die dieser Kanal mitbewegt, z. B. bei einem Kanal „alle“. Siehe unten. |
 
 Dazu kommen alle [Basis-Optionen für Covers](https://esphome.io/components/cover/#base-cover-configuration).
 
@@ -115,6 +116,28 @@ Zustand in Home Assistant stimmt: HOCH und RUNTER starten es, die Gegentaste ode
 genau wie beim Motor. Dabei wird nichts gesendet. Noch ausstehende Wiederholungen eines eigenen
 Befehls für das Cover werden verworfen, damit sie die Fernbedienung nicht übersteuern. Mit
 `follow_remote: false` lässt sich das pro Cover abschalten.
+
+Ein Kanal, der mehrere Rollläden fährt, z. B. „alle“ auf der Fernbedienung, ist ein Cover mit
+`members`. Bewegt er sich, aus Home Assistant oder über die Fernbedienung, folgen seine Mitglieder,
+ohne selbst zu senden. Ein Cover kann Mitglied mehrerer Kanäle sein, Gruppen lassen sich aber nicht
+verschachteln.
+
+```yaml
+cover:
+  - platform: warema_cover_hub
+    id: wohnzimmer_1
+    name: "Wohnzimmer 1"
+    # ...
+  - platform: warema_cover_hub
+    id: wohnzimmer_2
+    name: "Wohnzimmer 2"
+    # ...
+  - platform: warema_cover_hub
+    name: "Wohnzimmer alle"
+    command: "011"
+    # ...
+    members: [wohnzimmer_1, wohnzimmer_2]
+```
 
 ### Schalter: `platform: warema_cover_hub`
 

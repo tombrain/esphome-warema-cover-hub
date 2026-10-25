@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Covers follow the keys pressed on the original remote (`follow_remote`, default on), so
   their state in Home Assistant stays right. The opposite key stops a moving cover, like the
   motor does. Nothing is sent for this.
+- Cover option `members` for channels that move several blinds, e.g. "all": the members
+  follow the channel, from Home Assistant or the remote, without sending anything.
 
 ## [1.2.0] - 2026-10-25
 
