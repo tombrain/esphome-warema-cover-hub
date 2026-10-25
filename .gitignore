@@ -1,3 +1,4 @@
 deploy.bat
 __pycache__/
 .esphome/
+tests/.gitignore
