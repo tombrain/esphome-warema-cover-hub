@@ -31,16 +31,20 @@ def validate_binary_string(length):
     return validator
 
 
-CONFIG_SCHEMA = cover.cover_schema(WaremaCover).extend(
-    {
-        cv.GenerateID(CONF_WAREMA_COVER_HUB_ID): cv.use_id(WaremaCoverHub),
-        cv.Required(CONF_OPEN_DURATION): cv.positive_time_period_milliseconds,
-        cv.Required(CONF_CLOSE_DURATION): cv.positive_time_period_milliseconds,
-        cv.Required(CONF_DEVICECODE1): validate_binary_string(9),
-        cv.Required(CONF_DEVICECODE2): validate_binary_string(9),
-        cv.Required(CONF_COMMAND): validate_binary_string(3),
-    }
-).extend(cv.COMPONENT_SCHEMA)
+CONFIG_SCHEMA = (
+    cover.cover_schema(WaremaCover)
+    .extend(
+        {
+            cv.GenerateID(CONF_WAREMA_COVER_HUB_ID): cv.use_id(WaremaCoverHub),
+            cv.Required(CONF_OPEN_DURATION): cv.positive_time_period_milliseconds,
+            cv.Required(CONF_CLOSE_DURATION): cv.positive_time_period_milliseconds,
+            cv.Required(CONF_DEVICECODE1): validate_binary_string(9),
+            cv.Required(CONF_DEVICECODE2): validate_binary_string(9),
+            cv.Required(CONF_COMMAND): validate_binary_string(3),
+        }
+    )
+    .extend(cv.COMPONENT_SCHEMA)
+)
 
 
 async def to_code(config):
