@@ -159,7 +159,9 @@ void WaremaCover::start_direction_(CoverOperation dir) {
       return;
   }
 
-  this->last_operation_ = dir;
+  // Toggle reverses the last movement, so a STOP must not overwrite it
+  if (dir != COVER_OPERATION_IDLE)
+    this->last_operation_ = dir;
   this->current_operation = dir;
   this->last_recompute_time_ = millis();
 }

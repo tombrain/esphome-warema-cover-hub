@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   start moving again.
 - Reversing a moving cover sends STOP first and the new direction after it. Warema receivers
   stop on the opposite command, so the blind stopped while Home Assistant assumed it reversed.
+- Toggle after a STOP reverses the last movement. Before, it always closed the cover.
 - The send queue is limited to 32 telegrams, so a flood of commands cannot exhaust the memory.
 - `open_duration` and `close_duration` of 0 are rejected; they made the computed position invalid.
 - README: reading the codes, setup photo, credits, German translation.
