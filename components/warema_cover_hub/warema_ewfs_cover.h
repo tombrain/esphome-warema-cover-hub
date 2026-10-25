@@ -28,8 +28,6 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   cover::CoverTraits get_traits() override;
 
  protected:
-  enum class CommandType { OPEN, CLOSE, STOP };
-
   void control(const cover::CoverCall &call) override;
   bool is_at_target_() const;
   void start_direction_(cover::CoverOperation dir);

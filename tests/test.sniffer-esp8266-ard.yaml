@@ -1,0 +1,23 @@
+esphome:
+  name: test-sniffer-esp8266-ard
+
+esp8266:
+  board: d1_mini
+
+logger:
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [warema_cover_hub]
+
+remote_receiver:
+  id: rf_receiver
+  pin: D5
+  filter: 200us
+  idle: 4ms
+  buffer_size: 2kb
+
+warema_cover_hub:
+  receiver_id: rf_receiver

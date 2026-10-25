@@ -10,37 +10,8 @@ static const char *const TAG = "warema_cover_hub.cover";
 
 using namespace esphome::cover;
 
-// Telegram layout (36 characters):
-// S <command bits:8> <command:3> <suffix:3> S <devicecode1:9> S <devicecode2:9> S
-static const char SYNC = 'S';
-static const char *const OPEN_COMMAND_BITS = "01110100";
-static const char *const CLOSE_COMMAND_BITS = "01110100";  // identical to OPEN, direction is in the suffix
-static const char *const STOP_COMMAND_BITS = "00110100";
-static const char *const OPEN_SUFFIX = "111";
-static const char *const CLOSE_SUFFIX = "110";
-static const char *const STOP_SUFFIX = "001";
-
 std::string WaremaCover::build_telegram_(CommandType type) const {
-  std::string telegram;
-  telegram.reserve(36);
-  telegram.push_back(SYNC);
-
-  switch (type) {
-    case CommandType::OPEN:
-      telegram.append(OPEN_COMMAND_BITS).append(this->command_).append(OPEN_SUFFIX);
-      break;
-    case CommandType::CLOSE:
-      telegram.append(CLOSE_COMMAND_BITS).append(this->command_).append(CLOSE_SUFFIX);
-      break;
-    case CommandType::STOP:
-      telegram.append(STOP_COMMAND_BITS).append(this->command_).append(STOP_SUFFIX);
-      break;
-  }
-
-  telegram.push_back(SYNC);
-  telegram.append(this->devicecode1_).push_back(SYNC);
-  telegram.append(this->devicecode2_).push_back(SYNC);
-  return telegram;
+  return build_telegram(type, this->command_, this->devicecode1_, this->devicecode2_);
 }
 
 void WaremaCover::dump_config() {

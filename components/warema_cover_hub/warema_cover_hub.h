@@ -8,22 +8,28 @@
 #include "esphome/core/component.h"
 #include "esphome/components/remote_base/remote_base.h"
 
+#include "warema_protocol.h"
+
 namespace esphome {
 namespace warema_cover_hub {
 
 class WaremaCover;
 
-/// Sends Warema EWFS telegrams via a remote_transmitter.
+/// Sends Warema EWFS telegrams via a remote_transmitter and decodes received ones.
 ///
 /// Telegrams are queued and sent round-robin: every queued telegram is sent once per
 /// round until it has been transmitted `number_of_transmissions` times. This way commands
 /// for several covers issued at the same time reach all receivers quickly.
-class WaremaCoverHub : public Component {
+///
+/// Received telegrams (e.g. from the original remote) are logged with their codes.
+class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListener {
  public:
   void loop() override;
   void dump_config() override;
+  bool on_receive(remote_base::RemoteReceiveData data) override;
 
   void set_transmitter(remote_base::RemoteTransmitterBase *transmitter) { this->transmitter_ = transmitter; }
+  void set_has_receiver(bool has_receiver) { this->has_receiver_ = has_receiver; }
   void set_number_of_transmissions(uint8_t number_of_transmissions) {
     this->number_of_transmissions_ = number_of_transmissions;
   }
@@ -40,13 +46,17 @@ class WaremaCoverHub : public Component {
 
   /// Sends one telegram and returns its duration in microseconds.
   uint32_t transmit_(const std::string &telegram);
+  void handle_telegram_(const std::string &telegram);
 
   remote_base::RemoteTransmitterBase *transmitter_{nullptr};
+  bool has_receiver_{false};
   uint8_t number_of_transmissions_{3};
   std::vector<WaremaCover *> covers_{};
   std::deque<QueueEntry> queue_{};
   uint32_t last_transmit_time_{0};
   uint32_t busy_time_{0};
+  std::string last_received_telegram_;
+  uint32_t last_received_time_{0};
 };
 
 }  // namespace warema_cover_hub

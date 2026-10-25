@@ -1,5 +1,7 @@
 #include "warema_cover_hub.h"
 
+#include <cstdlib>
+
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
 
@@ -8,13 +10,16 @@ namespace warema_cover_hub {
 
 static const char *const TAG = "warema_cover_hub";
 
-static const size_t TELEGRAM_LENGTH = 36;
-static const int32_t BIT_LENGTH_US = 1780;
-static const int32_t SYNC_LENGTH_US = 5000;
 static const uint32_t TRANSMIT_GAP_MS = 10;
+// Receptions this long after our own transmission are its echo and ignored
+static const uint32_t RECEIVE_HOLDOFF_MS = 100;
+// The remote repeats each telegram, report repetitions within this window only once
+static const uint32_t DUPLICATE_WINDOW_MS = 1000;
 
 void WaremaCoverHub::dump_config() {
   ESP_LOGCONFIG(TAG, "Warema Cover Hub:");
+  ESP_LOGCONFIG(TAG, "  Transmitter: %s", YESNO(this->transmitter_ != nullptr));
+  ESP_LOGCONFIG(TAG, "  Receiver: %s", YESNO(this->has_receiver_));
   ESP_LOGCONFIG(TAG, "  Number of transmissions: %u", this->number_of_transmissions_);
   ESP_LOGCONFIG(TAG, "  Registered covers: %u", static_cast<unsigned>(this->covers_.size()));
 }
@@ -42,6 +47,10 @@ void WaremaCoverHub::loop() {
 }
 
 void WaremaCoverHub::send_command(const std::string &telegram) {
+  if (this->transmitter_ == nullptr) {
+    ESP_LOGW(TAG, "Ignoring telegram '%s': no transmitter configured", telegram.c_str());
+    return;
+  }
   if (telegram.length() != TELEGRAM_LENGTH) {
     ESP_LOGW(TAG, "Ignoring telegram '%s': expected %u characters, got %u", telegram.c_str(),
              static_cast<unsigned>(TELEGRAM_LENGTH), static_cast<unsigned>(telegram.length()));
@@ -51,51 +60,44 @@ void WaremaCoverHub::send_command(const std::string &telegram) {
   this->queue_.push_back({telegram, this->number_of_transmissions_});
 }
 
-// Encoding: 'S' = high for SYNC_LENGTH_US, 's' = low for SYNC_LENGTH_US,
-// '0' = high then low, '1' = low then high (each half of BIT_LENGTH_US).
 uint32_t WaremaCoverHub::transmit_(const std::string &telegram) {
-  remote_base::RawTimings timings;
-  timings.reserve(telegram.length() * 2);
-
-  // Appends a pulse, merging it with the previous one if it has the same level.
-  auto append = [&timings](bool high, int32_t length) {
-    if (!timings.empty() && (timings.back() > 0) == high) {
-      timings.back() += high ? length : -length;
-    } else {
-      timings.push_back(high ? length : -length);
-    }
-  };
-
-  const int32_t half_bit = BIT_LENGTH_US / 2;
-  for (char c : telegram) {
-    switch (c) {
-      case 'S':
-        append(true, SYNC_LENGTH_US);
-        break;
-      case 's':
-        append(false, SYNC_LENGTH_US);
-        break;
-      case '0':
-        append(true, half_bit);
-        append(false, half_bit);
-        break;
-      case '1':
-        append(false, half_bit);
-        append(true, half_bit);
-        break;
-      default:
-        break;
-    }
-  }
+  const remote_base::RawTimings timings = encode_telegram(telegram);
 
   uint32_t duration_us = 0;
   for (int32_t t : timings)
-    duration_us += t > 0 ? t : -t;
+    duration_us += std::abs(t);
 
   auto call = this->transmitter_->transmit();
   call.get_data()->set_data(timings);
   call.perform();
   return duration_us;
+}
+
+bool WaremaCoverHub::on_receive(remote_base::RemoteReceiveData data) {
+  if (!this->queue_.empty() || millis() - this->last_transmit_time_ < this->busy_time_ + RECEIVE_HOLDOFF_MS)
+    return false;
+
+  const auto telegrams = decode_telegrams(data.get_raw_data());
+  for (const auto &telegram : telegrams)
+    this->handle_telegram_(telegram);
+  return !telegrams.empty();
+}
+
+void WaremaCoverHub::handle_telegram_(const std::string &telegram) {
+  const uint32_t now = millis();
+  const bool repeated =
+      telegram == this->last_received_telegram_ && now - this->last_received_time_ < DUPLICATE_WINDOW_MS;
+  this->last_received_telegram_ = telegram;
+  this->last_received_time_ = now;
+  if (repeated)
+    return;
+
+  CommandType type;
+  const bool known = parse_command_type(telegram, &type);
+  ESP_LOGI(TAG, "Received %s: command: %s, devicecode1: %s, devicecode2: %s",
+           known ? command_type_to_str(type) : "UNKNOWN", telegram.substr(9, 3).c_str(), telegram.substr(16, 9).c_str(),
+           telegram.substr(26, 9).c_str());
+  ESP_LOGD(TAG, "Received telegram '%s'", telegram.c_str());
 }
 
 }  // namespace warema_cover_hub

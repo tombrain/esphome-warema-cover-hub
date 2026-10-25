@@ -19,9 +19,16 @@ remote_transmitter:
   pin: GPIO4
   carrier_duty_percent: 100%
 
+remote_receiver:
+  id: rf_receiver
+  pin: GPIO14
+  filter: 200us
+  idle: 4ms
+
 warema_cover_hub:
   id: warema_hub
   transmitter_id: rf_transmitter
+  receiver_id: rf_receiver
   number_of_transmissions: 3
 
 cover:
