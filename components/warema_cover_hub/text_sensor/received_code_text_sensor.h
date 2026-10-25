@@ -9,7 +9,8 @@
 namespace esphome {
 namespace warema_cover_hub {
 
-/// Shows the last telegram received from a remote, with the values of the cover configuration.
+/// Shows the last telegram received from a remote, with the values of the cover configuration
+/// and the covers it addresses.
 class ReceivedCodeTextSensor : public text_sensor::TextSensor, public Component, public Parented<WaremaCoverHub> {
  public:
   void setup() override;

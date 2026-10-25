@@ -1,4 +1,5 @@
 #include "warema_cover_hub.h"
+#include "warema_ewfs_cover.h"
 
 #include <cstdlib>
 
@@ -99,9 +100,29 @@ void WaremaCoverHub::handle_telegram_(const std::string &telegram) {
   if (repeated)
     return;
 
-  ESP_LOGI(TAG, "Received %s", describe_telegram(telegram).c_str());
+  const std::string description = this->describe_received_(telegram);
+  ESP_LOGI(TAG, "Received %s", description.c_str());
   ESP_LOGD(TAG, "Received telegram '%s'", telegram.c_str());
-  this->telegram_callback_.call(telegram);
+  this->telegram_callback_.call(telegram, description);
+}
+
+std::string WaremaCoverHub::describe_received_(const std::string &telegram) const {
+  std::string names;
+  for (const auto *cover : this->covers_) {
+    if (!cover->is_addressed_by(telegram))
+      continue;
+    if (!names.empty())
+      names.append(", ");
+    names.append(cover->get_name().c_str());
+  }
+
+  std::string description = describe_telegram(telegram);
+  if (names.empty()) {
+    description.append(" (no cover configured)");
+  } else {
+    description.append(" (cover: ").append(names).append(")");
+  }
+  return description;
 }
 
 }  // namespace warema_cover_hub

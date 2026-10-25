@@ -37,7 +37,8 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
     this->number_of_transmissions_ = number_of_transmissions;
   }
   void register_cover(WaremaCover *cover) { this->covers_.push_back(cover); }
-  /// Called with each received telegram, repetitions of the remote only once.
+  /// Called with each received telegram and its description (with the matching covers),
+  /// repetitions of the remote only once.
   template<typename F> void add_on_telegram_callback(F &&callback) {
     this->telegram_callback_.add(std::forward<F>(callback));
   }
@@ -51,6 +52,8 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   /// Sends one telegram and returns its duration in microseconds.
   uint32_t transmit_(const std::string &telegram);
   void handle_telegram_(const std::string &telegram);
+  /// Describes a received telegram including the names of the covers it addresses.
+  std::string describe_received_(const std::string &telegram) const;
 
   remote_base::RemoteTransmitterBase *transmitter_{nullptr};
   bool has_receiver_{false};
@@ -63,7 +66,7 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   std::string last_received_telegram_;
   uint32_t last_received_time_{0};
   EchoFilter echo_filter_;
-  CallbackManager<void(const std::string &)> telegram_callback_;
+  CallbackManager<void(const std::string &, const std::string &)> telegram_callback_;
 };
 
 }  // namespace warema_cover_hub

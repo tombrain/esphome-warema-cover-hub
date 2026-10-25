@@ -116,7 +116,7 @@ listening; the switch only stops decoding and logging.
 ### Text sensor: `platform: warema_cover_hub`
 
 Shows the last received telegram, e.g.
-`OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011`.
+`OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011 (cover: Bathroom)`.
 Requires `receiver_id` on the hub.
 
 Both take `warema_cover_hub_id` (needed only with more than one hub) and the base
@@ -159,10 +159,11 @@ text_sensor:
 Press a button on the remote near the receiver and watch the log (or the text sensor):
 
 ```
-[I][warema_cover_hub]: Received OPEN: command: 111, devicecode1: 101010010, devicecode2: 101010011
+[I][warema_cover_hub]: Received OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011 (no cover configured)
 ```
 
-Copy `command`, `devicecode1` and `devicecode2` into the cover configuration. Repeat this
+Copy `command`, `devicecode1` and `devicecode2` into the cover configuration. Once a cover with
+these codes is configured, the end of the line shows its name instead, e.g. `(cover: Bathroom)`. Repeat this
 for every blind or channel of the remote. A channel that moves several blinds at once
 (e.g. "all") has its own `command` and becomes a cover of its own.
 

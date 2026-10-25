@@ -28,6 +28,11 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
 
   cover::CoverTraits get_traits() override;
 
+  /// True if the telegram is meant for this cover (same command and device codes).
+  bool is_addressed_by(const std::string &telegram) const {
+    return same_receiver(telegram, this->build_telegram_(CommandType::STOP));
+  }
+
  protected:
   void control(const cover::CoverCall &call) override;
   bool is_at_target_() const;

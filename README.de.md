@@ -118,7 +118,7 @@ selbst lauscht weiter, der Schalter beendet nur das Dekodieren und Loggen.
 ### Textsensor: `platform: warema_cover_hub`
 
 Zeigt das zuletzt empfangene Telegramm an, z. B.
-`OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011`.
+`OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011 (cover: Bad)`.
 Braucht `receiver_id` am Hub.
 
 Beide kennen `warema_cover_hub_id` (nur bei mehr als einem Hub nötig) und die Basis-Optionen für
@@ -163,10 +163,11 @@ Drücke in der Nähe des Empfängers eine Taste der Fernbedienung und beobachte 
 Textsensor):
 
 ```
-[I][warema_cover_hub]: Received OPEN: command: 111, devicecode1: 101010010, devicecode2: 101010011
+[I][warema_cover_hub]: Received OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011 (no cover configured)
 ```
 
-Übernimm `command`, `devicecode1` und `devicecode2` in die Cover-Konfiguration. Wiederhole das
+Übernimm `command`, `devicecode1` und `devicecode2` in die Cover-Konfiguration. Sobald ein Cover
+mit diesen Codes konfiguriert ist, steht am Zeilenende stattdessen sein Name, z. B. `(cover: Bad)`. Wiederhole das
 für jeden Rollladen bzw. jeden Kanal der Fernbedienung. Ein Kanal, der mehrere Rollläden
 gleichzeitig fährt (z. B. „alle“), hat einen eigenen `command` und wird ein eigenes Cover.
 
