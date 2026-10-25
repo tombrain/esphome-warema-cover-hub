@@ -33,6 +33,7 @@ warema_cover_hub:
 
 cover:
   - platform: warema_cover_hub
+    id: cover_1
     name: "Cover 1"
     command: "111"
     devicecode1: "101010010"
@@ -55,3 +56,8 @@ switch:
 text_sensor:
   - platform: warema_cover_hub
     name: "Received Warema code"
+
+event:
+  - platform: warema_cover_hub
+    name: "Remote Cover 1"
+    cover_id: cover_1

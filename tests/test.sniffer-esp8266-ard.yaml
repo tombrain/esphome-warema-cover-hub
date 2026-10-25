@@ -29,3 +29,10 @@ switch:
 text_sensor:
   - platform: warema_cover_hub
     name: "Received Warema code"
+
+event:
+  - platform: warema_cover_hub
+    name: "Remote channel 2"
+    command: "110"
+    devicecode1: "101010010"
+    devicecode2: "101010011"

@@ -125,6 +125,54 @@ Beide kennen `warema_cover_hub_id` (nur bei mehr als einem Hub nötig) und die B
 [Schalter](https://esphome.io/components/switch/#base-switch-configuration) bzw.
 [Textsensoren](https://esphome.io/components/text_sensor/#base-text-sensor-configuration).
 
+### Event: `platform: warema_cover_hub`
+
+Löst in Home Assistant für jeden Tastendruck auf einem Kanal einer Fernbedienung ein Ereignis aus.
+So kann die Fernbedienung Automationen starten, z. B. mit den Funktionstasten A, B und C oder den
+Tasten eines Kanals ohne Rollladen. Braucht `receiver_id` am Hub. Eigene Sendungen lösen kein
+Ereignis aus.
+
+```yaml
+event:
+  # Kanal eines konfigurierten Covers
+  - platform: warema_cover_hub
+    name: "Fernbedienung Bad"
+    cover_id: cover_bad
+
+  # Kanal ohne Cover
+  - platform: warema_cover_hub
+    name: "Fernbedienung Kanal 2"
+    command: "110"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
+```
+
+| Option | Pflicht | Beschreibung |
+|---|---|---|
+| `cover_id` | eins von beiden | ID eines Covers, dessen Kanal gemeint ist. |
+| `command`, `devicecode1`, `devicecode2` | eins von beiden | Die Codes des Kanals, wie beim Cover. |
+| `warema_cover_hub_id` | nein | ID des Hubs. Nur nötig, wenn du mehr als einen Hub konfigurierst. |
+
+Dazu kommen die [Basis-Optionen für Events](https://esphome.io/components/event/#base-event-configuration).
+Die Ereignistypen sind `open`, `close`, `stop`, `function_a`, `function_b` und `function_c`.
+Eine Automation in Home Assistant, die auf Taste A reagiert:
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: event.fernbedienung_bad
+    not_from: [unavailable, unknown]
+conditions:
+  - condition: state
+    entity_id: event.fernbedienung_bad
+    attribute: event_type
+    state: function_a
+actions:
+  - action: light.toggle
+    target:
+      entity_id: light.bad
+```
+
 ## Codes auslesen
 
 Jeder Rollladen wird über drei Codes angesprochen, die du von seiner Original-Fernbedienung

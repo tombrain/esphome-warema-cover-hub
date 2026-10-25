@@ -30,6 +30,25 @@ const char *command_type_to_str(CommandType type) {
   }
 }
 
+const char *command_type_to_event_type(CommandType type) {
+  switch (type) {
+    case CommandType::OPEN:
+      return "open";
+    case CommandType::CLOSE:
+      return "close";
+    case CommandType::STOP:
+      return "stop";
+    case CommandType::FUNCTION_A:
+      return "function_a";
+    case CommandType::FUNCTION_B:
+      return "function_b";
+    case CommandType::FUNCTION_C:
+      return "function_c";
+    default:
+      return "unknown";
+  }
+}
+
 std::string build_telegram(CommandType type, const std::string &command, const std::string &devicecode1,
                            const std::string &devicecode2) {
   std::string telegram;

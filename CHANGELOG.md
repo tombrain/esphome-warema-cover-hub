@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Event platform: fires `open`, `close`, `stop` or `function_a` to `function_c` in Home
+  Assistant for each key pressed on a remote channel, given by `cover_id` or its codes.
 - Received telegrams name the configured covers they address, in the log and the text sensor,
   e.g. `(cover: Bathroom)` or `(no cover configured)`.
 

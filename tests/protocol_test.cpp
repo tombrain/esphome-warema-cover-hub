@@ -80,6 +80,8 @@ static void test_real_keys() {
     CHECK(parse_command_type(key.telegram, &type) && type == key.type);
     CHECK(build_telegram(key.type, "101", "001101001", "110010110") == key.telegram);
   }
+  CHECK(std::string(command_type_to_event_type(CommandType::OPEN)) == "open");
+  CHECK(std::string(command_type_to_event_type(CommandType::FUNCTION_C)) == "function_c");
   CHECK(describe_telegram(keys[3].telegram) ==
         "FUNCTION_A, command: 101, devicecode1: 001101001, devicecode2: 110010110");
 }

@@ -30,6 +30,8 @@ static const char *const FUNCTION_C_SUFFIX = "101";
 enum class CommandType { OPEN, CLOSE, STOP, FUNCTION_A, FUNCTION_B, FUNCTION_C };
 
 const char *command_type_to_str(CommandType type);
+/// Event type for Home Assistant, e.g. "open" or "function_a".
+const char *command_type_to_event_type(CommandType type);
 
 /// Builds a telegram, e.g. "S01110100111111S000011100S000011101S".
 std::string build_telegram(CommandType type, const std::string &command, const std::string &devicecode1,

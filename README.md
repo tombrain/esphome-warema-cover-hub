@@ -123,6 +123,53 @@ Both take `warema_cover_hub_id` (needed only with more than one hub) and the bas
 [switch](https://esphome.io/components/switch/#base-switch-configuration) or
 [text sensor](https://esphome.io/components/text_sensor/#base-text-sensor-configuration) options.
 
+### Event: `platform: warema_cover_hub`
+
+Fires an event in Home Assistant for every key pressed on one channel of a remote, so the
+remote can trigger automations, e.g. the function keys A, B and C or the keys of a channel
+without a blind. Requires `receiver_id` on the hub. Own transmissions do not fire events.
+
+```yaml
+event:
+  # Channel of a configured cover
+  - platform: warema_cover_hub
+    name: "Remote Bathroom"
+    cover_id: cover_bathroom
+
+  # Channel without a cover
+  - platform: warema_cover_hub
+    name: "Remote channel 2"
+    command: "110"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
+```
+
+| Option | Required | Description |
+|---|---|---|
+| `cover_id` | one of | ID of a cover whose channel is meant. |
+| `command`, `devicecode1`, `devicecode2` | one of | The codes of the channel, as for a cover. |
+| `warema_cover_hub_id` | no | ID of the hub. Needed only if you configure more than one hub. |
+
+Plus the base [event options](https://esphome.io/components/event/#base-event-configuration).
+The event types are `open`, `close`, `stop`, `function_a`, `function_b` and `function_c`.
+An automation in Home Assistant reacting to key A:
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: event.remote_bathroom
+    not_from: [unavailable, unknown]
+conditions:
+  - condition: state
+    entity_id: event.remote_bathroom
+    attribute: event_type
+    state: function_a
+actions:
+  - action: light.toggle
+    target:
+      entity_id: light.bathroom
+```
+
 ## Finding the codes
 
 Each blind is addressed by three codes, which you read from its original remote. The hub can
