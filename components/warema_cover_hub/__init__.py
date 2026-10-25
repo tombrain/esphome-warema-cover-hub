@@ -1,7 +1,8 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
+import esphome.final_validate as fv
 from esphome.components import remote_base
-from esphome.const import CONF_ID
+from esphome.const import CONF_ID, CONF_IDLE
 
 CODEOWNERS = ["@tombrain"]
 DEPENDENCIES = ["remote_base"]
@@ -12,6 +13,11 @@ CONF_WAREMA_COVER_HUB_ID = "warema_cover_hub_id"
 CONF_TRANSMITTER_ID = "transmitter_id"
 CONF_RECEIVER_ID = "receiver_id"
 CONF_NUMBER_OF_TRANSMISSIONS = "number_of_transmissions"
+
+# remote_receiver ends a capture after `idle` without an edge, at either level. A sync is
+# up to 6780 µs high (5000 µs plus a merged half bit on each side), so a shorter idle cuts
+# the telegram at its syncs.
+MIN_RECEIVER_IDLE_US = 7000
 
 warema_cover_hub_ns = cg.esphome_ns.namespace("warema_cover_hub")
 WaremaCoverHub = warema_cover_hub_ns.class_(
@@ -33,6 +39,24 @@ CONFIG_SCHEMA = cv.All(
     ).extend(cv.COMPONENT_SCHEMA),
     cv.has_at_least_one_key(CONF_TRANSMITTER_ID, CONF_RECEIVER_ID),
 )
+
+
+def _final_validate(config):
+    if CONF_RECEIVER_ID not in config:
+        return
+    full_config = fv.full_config.get()
+    receiver_path = full_config.get_path_for_id(config[CONF_RECEIVER_ID])[:-1]
+    receiver_config = full_config.get_config_for_path(receiver_path)
+    idle = receiver_config.get(CONF_IDLE)
+    if idle is not None and idle.total_microseconds < MIN_RECEIVER_IDLE_US:
+        raise cv.Invalid(
+            f"The receiver's '{CONF_IDLE}' must be at least "
+            f"{MIN_RECEIVER_IDLE_US // 1000}ms, Warema syncs are up to 6.8ms long",
+            path=[CONF_RECEIVER_ID],
+        )
+
+
+FINAL_VALIDATE_SCHEMA = _final_validate
 
 
 async def to_code(config):

@@ -23,7 +23,7 @@ remote_receiver:
   id: rf_receiver
   pin: GPIO14
   filter: 200us
-  idle: 4ms
+  idle: 10ms
 
 warema_cover_hub:
   id: warema_hub

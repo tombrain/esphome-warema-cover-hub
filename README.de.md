@@ -143,7 +143,7 @@ remote_receiver:
   id: rf_receiver
   pin: D5             # ESP8266 (GPIO14); beim ESP32 ein beliebiger freier Eingangs-GPIO
   filter: 200us
-  idle: 4ms           # muss länger als 1,8 ms sein, die längste Pause innerhalb eines Telegramms
+  idle: 10ms          # mindestens 7 ms, ein Sync ist bis zu 6,8 ms lang
   buffer_size: 2kb    # nur ESP8266
 
 warema_cover_hub:
