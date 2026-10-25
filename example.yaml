@@ -1,0 +1,30 @@
+esphome:
+  name: warema-covers
+
+esp32:
+  board: esp32dev
+
+logger:
+
+external_components:
+  - source: github://tombrain/esphome-warema-cover-hub@v1.0.0
+    components: [warema_cover_hub]
+
+remote_transmitter:
+  id: rf_transmitter
+  pin: GPIO4
+  carrier_duty_percent: 100%
+
+warema_cover_hub:
+  id: warema_hub
+  transmitter_id: rf_transmitter
+  number_of_transmissions: 3
+
+cover:
+  - platform: warema_cover_hub
+    name: "Cover Bathroom"
+    command: "111"
+    devicecode1: "000011100"
+    devicecode2: "000011101"
+    open_duration: 24s
+    close_duration: 24s

@@ -1,1 +1,3 @@
 deploy.bat
+__pycache__/
+.esphome/
