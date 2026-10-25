@@ -22,7 +22,7 @@ jobs:
       - run: pip install ruff==0.16.10 clang-format==13.0.1
       - run: ruff format --check components
       - run: ruff check components
-      - run: clang-format --dry-run --Werror components/warema_cover_hub/*.cpp components/warema_cover_hub/*.h tests/*.cpp
+      - run: clang-format --dry-run --Werror $(git ls-files '*.cpp' '*.h')
 
   protocol-test:
     runs-on: ubuntu-latest
