@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Text sensor platform showing the last received code in Home Assistant.
 - Own transmissions are recognized by content, not only by timing, so their echo is not
   reported as received even when the loop is delayed after sending.
+
+### Fixed
+
+- A new command for a cover replaces its pending repetitions. Before, e.g. a STOP shortly
+  after an OPEN was sent alternately with the remaining OPEN repetitions, so the blind could
+  start moving again.
 - README: reading the codes, setup photo, credits, German translation.
 
 ## [1.0.1] - 2026-10-25

@@ -83,7 +83,8 @@ A complete example is in [example.yaml](example.yaml).
 \* At least one of `transmitter_id` and `receiver_id` is required.
 
 Telegrams are sent round-robin: if several covers are commanded at once, each one gets its
-first transmission before any telegram is repeated.
+first transmission before any telegram is repeated. A new command for a cover replaces its
+pending repetitions, so a STOP is never followed by a leftover OPEN.
 
 ### Cover: `platform: warema_cover_hub`
 

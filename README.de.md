@@ -84,7 +84,9 @@ Ein vollständiges Beispiel findest du in [example.yaml](example.yaml).
 \* Mindestens eine der Optionen `transmitter_id` und `receiver_id` ist nötig.
 
 Die Telegramme werden reihum gesendet: Bekommen mehrere Covers gleichzeitig einen Befehl, wird
-jedes Telegramm einmal gesendet, bevor eines wiederholt wird.
+jedes Telegramm einmal gesendet, bevor eines wiederholt wird. Ein neuer Befehl für ein Cover
+ersetzt dessen noch ausstehende Wiederholungen, auf ein STOP folgt also nie ein übrig gebliebenes
+OPEN.
 
 ### Cover: `platform: warema_cover_hub`
 

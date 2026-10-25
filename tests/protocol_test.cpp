@@ -118,6 +118,56 @@ static void test_incomplete() {
   CHECK(decode_telegrams({}).empty());
 }
 
+static void test_same_receiver() {
+  const std::string open = build_telegram(CommandType::OPEN, "111", "001101001", "110010110");
+  CHECK(same_receiver(open, build_telegram(CommandType::STOP, "111", "001101001", "110010110")));
+  // Channel "all" of the same remote is another receiver
+  CHECK(!same_receiver(open, build_telegram(CommandType::OPEN, "011", "001101001", "110010110")));
+  CHECK(!same_receiver(open, build_telegram(CommandType::OPEN, "111", "001101001", "110010111")));
+  CHECK(!same_receiver(open, "S0111"));
+}
+
+static void test_queue_round_robin() {
+  const std::string a = build_telegram(CommandType::OPEN, "111", "000000001", "000000001");
+  const std::string b = build_telegram(CommandType::OPEN, "111", "000000010", "000000010");
+  TelegramQueue queue;
+  queue.push(a, 3);
+  queue.push(b, 2);
+  std::vector<std::string> sent;
+  while (!queue.empty())
+    sent.push_back(queue.pop());
+  CHECK((sent == std::vector<std::string>{a, b, a, b, a}));
+  CHECK(queue.pop().empty());
+
+  queue.push(a, 0);
+  CHECK(queue.empty());
+}
+
+// A STOP must not be followed by leftover repetitions of the OPEN before it
+static void test_queue_replaces_pending_command() {
+  const std::string open = build_telegram(CommandType::OPEN, "111", "010001011", "010001100");
+  const std::string stop = build_telegram(CommandType::STOP, "111", "010001011", "010001100");
+  const std::string other = build_telegram(CommandType::OPEN, "110", "101000110", "011001010");
+
+  TelegramQueue queue;
+  queue.push(open, 10);
+  queue.push(other, 10);
+  CHECK(queue.pop() == open);
+  CHECK(queue.pop() == other);
+  queue.push(stop, 10);
+  CHECK(queue.size() == 2);
+
+  int stops = 0, others = 0;
+  while (!queue.empty()) {
+    const std::string t = queue.pop();
+    CHECK(t != open);
+    stops += t == stop;
+    others += t == other;
+  }
+  CHECK(stops == 10);
+  CHECK(others == 9);  // the other cover keeps its remaining repetitions
+}
+
 static void test_echo_filter() {
   const std::string open = build_telegram(CommandType::OPEN, "111", "010001011", "010001100");
   const std::string stop = build_telegram(CommandType::STOP, "111", "010001011", "010001100");
@@ -157,6 +207,9 @@ int main() {
   test_repetitions_and_noise();
   test_incomplete();
   test_echo_filter();
+  test_same_receiver();
+  test_queue_round_robin();
+  test_queue_replaces_pending_command();
   if (failures == 0)
     std::printf("All tests passed\n");
   return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

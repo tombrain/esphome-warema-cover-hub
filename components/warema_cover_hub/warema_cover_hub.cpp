@@ -34,17 +34,12 @@ void WaremaCoverHub::loop() {
   if (now - this->last_transmit_time_ < this->busy_time_)
     return;
 
-  QueueEntry entry = std::move(this->queue_.front());
-  this->queue_.pop_front();
-
-  ESP_LOGV(TAG, "Transmitting '%s' (%u left)", entry.telegram.c_str(), entry.remaining_transmissions - 1);
-  const uint32_t duration_us = this->transmit_(entry.telegram);
+  const std::string telegram = this->queue_.pop();
+  ESP_LOGV(TAG, "Transmitting '%s' (%u queued)", telegram.c_str(), static_cast<unsigned>(this->queue_.size()));
+  const uint32_t duration_us = this->transmit_(telegram);
   this->last_transmit_time_ = now;
-  this->echo_filter_.add_sent(entry.telegram, now);
+  this->echo_filter_.add_sent(telegram, now);
   this->busy_time_ = (duration_us + 999) / 1000 + TRANSMIT_GAP_MS;
-
-  if (--entry.remaining_transmissions > 0)
-    this->queue_.push_back(std::move(entry));
 }
 
 void WaremaCoverHub::send_command(const std::string &telegram) {
@@ -58,7 +53,7 @@ void WaremaCoverHub::send_command(const std::string &telegram) {
     return;
   }
   ESP_LOGD(TAG, "Queueing telegram '%s'", telegram.c_str());
-  this->queue_.push_back({telegram, this->number_of_transmissions_});
+  this->queue_.push(telegram, this->number_of_transmissions_);
 }
 
 uint32_t WaremaCoverHub::transmit_(const std::string &telegram) {

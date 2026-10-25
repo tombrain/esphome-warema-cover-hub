@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -41,6 +42,30 @@ std::vector<int32_t> encode_telegram(const std::string &telegram);
 
 /// Finds all complete telegrams in raw timings.
 std::vector<std::string> decode_telegrams(const std::vector<int32_t> &timings);
+
+/// True if both telegrams address the same receiver (same command and device codes).
+bool same_receiver(const std::string &a, const std::string &b);
+
+/// Telegrams waiting to be sent, each a number of times, round-robin.
+///
+/// A new telegram replaces pending ones for the same receiver, so a STOP is not
+/// followed by leftover repetitions of the OPEN before it.
+class TelegramQueue {
+ public:
+  void push(const std::string &telegram, uint8_t transmissions);
+  bool empty() const { return this->entries_.empty(); }
+  size_t size() const { return this->entries_.size(); }
+  /// Returns the next telegram to send (empty if none) and requeues it if it has
+  /// transmissions left.
+  std::string pop();
+
+ protected:
+  struct Entry {
+    std::string telegram;
+    uint8_t remaining;
+  };
+  std::deque<Entry> entries_;
+};
 
 /// Recognizes received telegrams that are the echo of our own transmissions.
 ///

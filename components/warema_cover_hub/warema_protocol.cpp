@@ -184,6 +184,36 @@ std::vector<std::string> decode_telegrams(const std::vector<int32_t> &timings) {
   return telegrams;
 }
 
+bool same_receiver(const std::string &a, const std::string &b) {
+  if (a.length() != TELEGRAM_LENGTH || b.length() != TELEGRAM_LENGTH)
+    return false;
+  // command at 9..11, device codes from the second sync at 15 to the end
+  return a.compare(9, 3, b, 9, 3) == 0 && a.compare(15, std::string::npos, b, 15, std::string::npos) == 0;
+}
+
+void TelegramQueue::push(const std::string &telegram, uint8_t transmissions) {
+  for (auto it = this->entries_.begin(); it != this->entries_.end();) {
+    if (same_receiver(it->telegram, telegram)) {
+      it = this->entries_.erase(it);
+    } else {
+      ++it;
+    }
+  }
+  if (transmissions > 0)
+    this->entries_.push_back({telegram, transmissions});
+}
+
+std::string TelegramQueue::pop() {
+  if (this->entries_.empty())
+    return {};
+  Entry entry = std::move(this->entries_.front());
+  this->entries_.pop_front();
+  std::string telegram = entry.telegram;
+  if (--entry.remaining > 0)
+    this->entries_.push_back(std::move(entry));
+  return telegram;
+}
+
 void EchoFilter::add_sent(const std::string &telegram, uint32_t now) {
   // Drop expired entries and an older entry of the same telegram
   for (auto it = this->sent_.begin(); it != this->sent_.end();) {
