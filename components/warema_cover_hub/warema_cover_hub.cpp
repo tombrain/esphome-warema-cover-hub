@@ -52,8 +52,11 @@ void WaremaCoverHub::send_command(const std::string &telegram) {
              static_cast<unsigned>(TELEGRAM_LENGTH), static_cast<unsigned>(telegram.length()));
     return;
   }
-  ESP_LOGD(TAG, "Queueing telegram '%s'", telegram.c_str());
-  this->queue_.push(telegram, this->number_of_transmissions_);
+  if (!this->queue_.push(telegram, this->number_of_transmissions_)) {
+    ESP_LOGW(TAG, "Ignoring telegram '%s': queue is full", telegram.c_str());
+    return;
+  }
+  ESP_LOGD(TAG, "Queued telegram '%s'", telegram.c_str());
 }
 
 uint32_t WaremaCoverHub::transmit_(const std::string &telegram) {

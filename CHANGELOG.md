@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A new command for a cover replaces its pending repetitions. Before, e.g. a STOP shortly
   after an OPEN was sent alternately with the remaining OPEN repetitions, so the blind could
   start moving again.
+- The send queue is limited to 32 telegrams, so a flood of commands cannot exhaust the memory.
 - README: reading the codes, setup photo, credits, German translation.
 
 ## [1.0.1] - 2026-10-25

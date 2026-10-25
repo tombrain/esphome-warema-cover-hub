@@ -143,6 +143,24 @@ static void test_queue_round_robin() {
   CHECK(queue.empty());
 }
 
+static void test_queue_limit() {
+  TelegramQueue queue;
+  for (size_t i = 0; i < TelegramQueue::MAX_ENTRIES; i++) {
+    std::string code;  // distinct device codes, i in binary
+    for (int bit = 8; bit >= 0; bit--)
+      code.push_back((i >> bit) & 1 ? '1' : '0');
+    CHECK(queue.push(build_telegram(CommandType::OPEN, "111", code, "000000000"), 3));
+  }
+  const std::string extra = build_telegram(CommandType::OPEN, "111", "111111111", "111111111");
+  CHECK(!queue.push(extra, 3));
+  CHECK(queue.size() == TelegramQueue::MAX_ENTRIES);
+
+  // Replacing a pending command still works when full
+  const std::string first = queue.pop();
+  CHECK(queue.push(build_telegram(CommandType::STOP, "111", first.substr(16, 9), "000000000"), 3));
+  CHECK(queue.size() == TelegramQueue::MAX_ENTRIES);
+}
+
 // A STOP must not be followed by leftover repetitions of the OPEN before it
 static void test_queue_replaces_pending_command() {
   const std::string open = build_telegram(CommandType::OPEN, "111", "010001011", "010001100");
@@ -210,6 +228,7 @@ int main() {
   test_same_receiver();
   test_queue_round_robin();
   test_queue_replaces_pending_command();
+  test_queue_limit();
   if (failures == 0)
     std::printf("All tests passed\n");
   return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

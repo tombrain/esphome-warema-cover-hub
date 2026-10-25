@@ -52,7 +52,11 @@ bool same_receiver(const std::string &a, const std::string &b);
 /// followed by leftover repetitions of the OPEN before it.
 class TelegramQueue {
  public:
-  void push(const std::string &telegram, uint8_t transmissions);
+  /// Bounds the memory use; one entry per receiver is the normal case.
+  static constexpr size_t MAX_ENTRIES = 32;
+
+  /// Returns false if the queue is full and the telegram was dropped.
+  bool push(const std::string &telegram, uint8_t transmissions);
   bool empty() const { return this->entries_.empty(); }
   size_t size() const { return this->entries_.size(); }
   /// Returns the next telegram to send (empty if none) and requeues it if it has
