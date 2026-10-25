@@ -22,14 +22,23 @@ jobs:
       - run: pip install ruff==0.16.10 clang-format==13.0.1
       - run: ruff format --check components
       - run: ruff check components
-      - run: clang-format --dry-run --Werror components/warema_cover_hub/*.cpp components/warema_cover_hub/*.h
+      - run: clang-format --dry-run --Werror components/warema_cover_hub/*.cpp components/warema_cover_hub/*.h tests/*.cpp
+
+  protocol-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: >-
+          g++ -std=c++17 -Wall -Wextra -Werror -I components/warema_cover_hub
+          tests/protocol_test.cpp components/warema_cover_hub/warema_protocol.cpp -o protocol_test
+      - run: ./protocol_test
 
   compile:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        test: [esp32-idf, esp8266-ard]
+        test: [esp32-idf, esp8266-ard, sniffer-esp8266-ard]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
