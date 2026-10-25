@@ -42,7 +42,7 @@ static std::vector<int32_t> jitter(std::vector<int32_t> timings, int32_t max_us)
 static void append(std::vector<int32_t> &a, const std::vector<int32_t> &b) { a.insert(a.end(), b.begin(), b.end()); }
 
 static void test_known_telegram() {
-  // Example from the original remote
+  // Layout example (fictitious codes)
   const std::string telegram = "S01110100111111S100110001S101010011S";
   CHECK(build_telegram(CommandType::OPEN, "111", "100110001", "101010011") == telegram);
   CommandType type;
@@ -62,7 +62,7 @@ static void test_parse() {
   CHECK(!parse_command_type("S0111", &type));
 }
 
-// Telegrams of all keys of a real remote (channel 3 of "Wohnzimmer")
+// Telegrams of all keys of a real remote (channel 101, fictitious device codes)
 static void test_real_keys() {
   const struct {
     const char *telegram;
