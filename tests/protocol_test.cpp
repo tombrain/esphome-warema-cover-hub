@@ -103,6 +103,26 @@ static void test_repetitions_and_noise() {
     CHECK(d == telegram);
 }
 
+// Captured from a real remote (STOP on channel 101) with a superregenerative receiver.
+// The syncs were cut off by a too short idle, they are added here as they are sent:
+// 5000 µs, plus 890 µs for each adjacent half bit of the same level. The device codes are
+// replaced by fictitious ones, their pulses carry the measured deviations of the capture.
+static void test_real_capture() {
+  std::vector<int32_t> timings = {5890};
+  append(timings,
+         {-861, 909, -1752, 922, -854, 1800, -1748, 1799, -866, 898, -1761, 1790, -1759, 1790, -875, 895, -1765});
+  timings.push_back(6780);
+  append(timings, {-888, 958, -1704, 891, -883, 1776, -1773, 1783, -882, 888, -1770});
+  timings.push_back(5890);
+  append(timings, {-895, 884, -869, 1788, -870, 904, -1768, 1787, -1770, 884, -885, 1776, -883});
+  timings.push_back(5000);
+
+  const auto decoded = decode_telegrams(timings);
+  CHECK(decoded.size() == 1);
+  if (!decoded.empty())
+    CHECK(decoded[0] == build_telegram(CommandType::STOP, "101", "001101001", "110010110"));
+}
+
 static void test_incomplete() {
   const std::string telegram = build_telegram(CommandType::STOP, "111", "010001011", "010001100");
   auto timings = encode_telegram(telegram);
@@ -238,6 +258,7 @@ int main() {
   test_jitter();
   test_repetitions_and_noise();
   test_incomplete();
+  test_real_capture();
   test_echo_filter();
   test_same_receiver();
   test_queue_round_robin();
