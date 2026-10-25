@@ -2,10 +2,14 @@
 
 [![CI](https://github.com/tombrain/esphome-warema-cover-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/tombrain/esphome-warema-cover-hub/actions/workflows/ci.yml)
 
+**English** | [Deutsch](README.de.md)
+
 An [ESPHome](https://esphome.io) external component for controlling Warema EWFS roller blinds over 433 MHz.
 
 It consists of a hub that sends the radio telegrams through a
 [`remote_transmitter`](https://esphome.io/components/remote_transmitter.html) and any number of covers.
+With a [`remote_receiver`](https://esphome.io/components/remote_receiver.html), the hub also
+decodes the telegrams of the original remote, so you can read the codes of your blinds.
 The cover position is estimated from the open and close durations, like ESPHome's
 [`time_based`](https://esphome.io/components/cover/time_based.html) cover.
 
@@ -72,8 +76,11 @@ A complete example is in [example.yaml](example.yaml).
 | Option | Required | Default | Description |
 |---|---|---|---|
 | `id` | no | | ID of the hub. Needed only if you configure more than one hub. |
-| `transmitter_id` | yes | | ID of the `remote_transmitter` to send with. |
+| `transmitter_id` | no* | | ID of the `remote_transmitter` to send with. |
+| `receiver_id` | no* | | ID of a `remote_receiver`. Received telegrams are logged, see [Finding the codes](#finding-the-codes). |
 | `number_of_transmissions` | no | `3` | How often each telegram is sent (1–10). |
+
+\* At least one of `transmitter_id` and `receiver_id` is required.
 
 Telegrams are sent round-robin: if several covers are commanded at once, each one gets its
 first transmission before any telegram is repeated.
@@ -91,20 +98,52 @@ first transmission before any telegram is repeated.
 
 Plus all [base cover options](https://esphome.io/components/cover/#base-cover-configuration).
 
+The easiest way to get the durations is a stopwatch: open the blind fully once and close it
+fully once. The two times may differ.
+
 ## Finding the codes
 
-Each blind has its own codes. Read them from the original remote with a 433 MHz receiver:
+Each blind is addressed by three codes, which you read from its original remote. The hub can
+decode them when you connect a 433 MHz receiver module, e.g. an RXB6 or a cheaper XY-MK-5V.
+Connect VCC, GND and DATA like the transmitter. Mind the voltage: the GPIOs of the ESP take
+3.3 V only. Run the RXB6 from 3.3 V; the XY-MK-5V needs 5 V and then outputs 5 V on DATA,
+so put a voltage divider (e.g. 10 kΩ / 20 kΩ) in front of the GPIO.
+
+![ESP8266 with a 433 MHz receiver on a breadboard](docs/sniffer-setup.jpg)
+
+A receiver-only setup like this is enough for reading the codes:
 
 ```yaml
 remote_receiver:
-  pin: GPIO14
-  dump: raw
+  id: rf_receiver
+  pin: D5             # ESP8266 (GPIO14); any free input GPIO on the ESP32
+  filter: 200us
+  idle: 4ms           # must be longer than 1.8 ms, the longest gap within a telegram
+  buffer_size: 2kb    # ESP8266 only
+
+warema_cover_hub:
+  receiver_id: rf_receiver
 ```
 
-Press a button on the remote and decode the logged timings: a pulse of ~5000 µs is a sync
-(`S`), a 1780 µs bit is `0` when it is high first and `1` when it is low first.
-The telegram has the layout
-`S <8 command bits> <command:3> <suffix:3> S <devicecode1:9> S <devicecode2:9> S`.
+Press a button on the remote near the receiver and watch the log:
+
+```
+[I][warema_cover_hub]: Received OPEN: command: 111, devicecode1: 101010010, devicecode2: 101010011
+```
+
+Copy `command`, `devicecode1` and `devicecode2` into the cover configuration. Repeat this
+for every blind or channel of the remote. A channel that moves several blinds at once
+(e.g. "all") has its own `command` and becomes a cover of its own.
+
+`UNKNOWN` instead of `OPEN`, `CLOSE` or `STOP` means a command this component does not
+send. Please open an issue with the telegram from the debug log.
+
+### Protocol
+
+A telegram has the layout
+`S <command bits:8> <command:3> <suffix:3> S <devicecode1:9> S <devicecode2:9> S`.
+`S` is a 5000 µs high sync, each bit lasts 1780 µs: `0` is high then low, `1` is low then
+high (Manchester code). The command bits and the suffix select OPEN, CLOSE or STOP.
 
 ## Versioning
 
@@ -119,6 +158,11 @@ configuration increase the major version. See the
 - The hub's `name` option is gone.
 - `warema_cover_hub_id` on covers is optional when there is only one hub.
 - The `rc-switch` library is no longer used.
+
+## Credits
+
+The protocol is taken from [aircontrol](https://github.com/rfkd/aircontrol) by
+Ralf Dauberschmidt, which controls Warema EWFS devices from a Raspberry Pi.
 
 ## License
 

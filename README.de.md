@@ -1,0 +1,174 @@
+# Warema EWFS Cover Hub für ESPHome
+
+[![CI](https://github.com/tombrain/esphome-warema-cover-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/tombrain/esphome-warema-cover-hub/actions/workflows/ci.yml)
+
+[English](README.md) | **Deutsch**
+
+Eine [ESPHome](https://esphome.io) External Component, mit der du Warema-EWFS-Rollläden über 433 MHz steuerst.
+
+Sie besteht aus einem Hub, der die Funktelegramme über einen
+[`remote_transmitter`](https://esphome.io/components/remote_transmitter.html) sendet, und beliebig vielen Covers.
+Mit einem [`remote_receiver`](https://esphome.io/components/remote_receiver.html) dekodiert der Hub
+außerdem die Telegramme der Original-Fernbedienung, damit kannst du die Codes deiner Rollläden auslesen.
+Die Position der Rollläden wird aus der Laufzeit berechnet, wie beim
+[`time_based`](https://esphome.io/components/cover/time_based.html)-Cover von ESPHome.
+
+Läuft auf ESP32 und ESP8266, mit dem Arduino- und dem ESP-IDF-Framework.
+
+> Dieses Projekt steht in keiner Verbindung zu WAREMA und wird von WAREMA nicht unterstützt.
+> Die Nutzung erfolgt auf eigene Gefahr.
+
+## Hardware
+
+Du brauchst einen ESP32 oder ESP8266 und ein 433-MHz-OOK-Sendemodul, z. B. FS1000A.
+
+| Sender | ESP |
+|---|---|
+| `VCC` | 5 V (das Modul verträgt 3,3–12 V; mehr Spannung bringt mehr Reichweite) |
+| `GND` | GND |
+| `DATA` | ein freier Ausgangs-GPIO, z. B. GPIO4 (ESP32) oder D1 (ESP8266) |
+
+Der 3,3-V-Pegel des ESP reicht für `DATA`. Beim ESP32 solltest du die Strapping-Pins
+GPIO0, 2, 5, 12 und 15 meiden.
+
+Löte einen 17,3 cm langen Draht (eine Viertelwellenlänge bei 433,92 MHz) an das `ANT`-Pad des
+Moduls. Ohne Antenne beträgt die Reichweite nur wenige Meter.
+
+Die Rollläden melden ihre Position nicht zurück. Die Komponente schätzt sie anhand der Laufzeit,
+deshalb weicht sie ab, wenn ein Rollladen mit der Original-Fernbedienung bewegt wird.
+
+## Installation
+
+```yaml
+external_components:
+  - source: github://tombrain/esphome-warema-cover-hub@v1.0.1
+    components: [warema_cover_hub]
+```
+
+Gib einen Release-Tag an (`@v1.0.1`). Ohne Tag folgt ESPHome dem Branch `main`.
+
+## Konfiguration
+
+```yaml
+remote_transmitter:
+  id: rf_transmitter
+  pin: GPIO4
+  carrier_duty_percent: 100%   # nötig für 433-MHz-OOK-Module
+
+warema_cover_hub:
+  id: warema_hub
+  transmitter_id: rf_transmitter
+  number_of_transmissions: 3
+
+cover:
+  - platform: warema_cover_hub
+    name: "Rollladen Bad"
+    command: "111"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
+    open_duration: 24s
+    close_duration: 24s
+```
+
+Ein vollständiges Beispiel findest du in [example.yaml](example.yaml).
+
+### Hub: `warema_cover_hub`
+
+| Option | Pflicht | Standard | Beschreibung |
+|---|---|---|---|
+| `id` | nein | | ID des Hubs. Nur nötig, wenn du mehr als einen Hub konfigurierst. |
+| `transmitter_id` | nein* | | ID des `remote_transmitter`, über den gesendet wird. |
+| `receiver_id` | nein* | | ID eines `remote_receiver`. Empfangene Telegramme werden geloggt, siehe [Codes auslesen](#codes-auslesen). |
+| `number_of_transmissions` | nein | `3` | Wie oft jedes Telegramm gesendet wird (1–10). |
+
+\* Mindestens eine der Optionen `transmitter_id` und `receiver_id` ist nötig.
+
+Die Telegramme werden reihum gesendet: Bekommen mehrere Covers gleichzeitig einen Befehl, wird
+jedes Telegramm einmal gesendet, bevor eines wiederholt wird.
+
+### Cover: `platform: warema_cover_hub`
+
+| Option | Pflicht | Beschreibung |
+|---|---|---|
+| `warema_cover_hub_id` | nein | ID des Hubs. Nur nötig, wenn du mehr als einen Hub konfigurierst. |
+| `command` | ja | 3-Bit-Kanalcode des Rollladens, z. B. `"111"`. |
+| `devicecode1` | ja | Erster 9-Bit-Gerätecode, z. B. `"101010010"`. |
+| `devicecode2` | ja | Zweiter 9-Bit-Gerätecode. |
+| `open_duration` | ja | Zeit zum vollständigen Öffnen. |
+| `close_duration` | ja | Zeit zum vollständigen Schließen. |
+
+Dazu kommen alle [Basis-Optionen für Covers](https://esphome.io/components/cover/#base-cover-configuration).
+
+Die Laufzeiten misst du am einfachsten mit der Stoppuhr: Rollladen einmal ganz öffnen und einmal
+ganz schließen. Die beiden Zeiten können sich unterscheiden.
+
+## Codes auslesen
+
+Jeder Rollladen wird über drei Codes angesprochen, die du von seiner Original-Fernbedienung
+ausliest. Das erledigt der Hub, wenn du ein 433-MHz-Empfangsmodul anschließt, z. B. einen RXB6
+oder einen günstigeren XY-MK-5V. VCC, GND und DATA schließt du an wie beim Sender. Achte auf
+die Spannung: Die GPIOs des ESP vertragen nur 3,3 V. Den RXB6 betreibst du an 3,3 V. Der
+XY-MK-5V braucht 5 V und gibt dann auch 5 V auf DATA aus, deshalb gehört ein Spannungsteiler
+(z. B. 10 kΩ / 20 kΩ) vor den GPIO.
+
+![ESP8266 mit 433-MHz-Empfänger auf einem Steckbrett](docs/sniffer-setup.jpg)
+
+Zum Auslesen der Codes reicht ein Aufbau nur mit Empfänger wie dieser:
+
+```yaml
+remote_receiver:
+  id: rf_receiver
+  pin: D5             # ESP8266 (GPIO14); beim ESP32 ein beliebiger freier Eingangs-GPIO
+  filter: 200us
+  idle: 4ms           # muss länger als 1,8 ms sein, die längste Pause innerhalb eines Telegramms
+  buffer_size: 2kb    # nur ESP8266
+
+warema_cover_hub:
+  receiver_id: rf_receiver
+```
+
+Drücke in der Nähe des Empfängers eine Taste der Fernbedienung und beobachte das Log:
+
+```
+[I][warema_cover_hub]: Received OPEN: command: 111, devicecode1: 101010010, devicecode2: 101010011
+```
+
+Übernimm `command`, `devicecode1` und `devicecode2` in die Cover-Konfiguration. Wiederhole das
+für jeden Rollladen bzw. jeden Kanal der Fernbedienung. Ein Kanal, der mehrere Rollläden
+gleichzeitig fährt (z. B. „alle“), hat einen eigenen `command` und wird ein eigenes Cover.
+
+Steht im Log `UNKNOWN` statt `OPEN`, `CLOSE` oder `STOP`, handelt es sich um einen Befehl, den
+diese Komponente nicht sendet. Eröffne dann bitte ein Issue mit dem Telegramm aus dem Debug-Log.
+
+### Protokoll
+
+Ein Telegramm ist so aufgebaut:
+`S <Befehlsbits:8> <command:3> <Suffix:3> S <devicecode1:9> S <devicecode2:9> S`.
+`S` ist ein Sync-Puls mit 5000 µs High, jedes Bit dauert 1780 µs: `0` ist erst High, dann Low,
+`1` ist erst Low, dann High (Manchester-Code). Befehlsbits und Suffix legen fest, ob es OPEN,
+CLOSE oder STOP ist.
+
+## Versionierung
+
+Dieses Projekt folgt [Semantic Versioning](https://semver.org). Inkompatible Änderungen an der
+YAML-Konfiguration erhöhen die Hauptversion. Die Änderungen stehen bei den
+[Releases](https://github.com/tombrain/esphome-warema-cover-hub/releases).
+
+### Umstieg von 0.x
+
+- Die Komponente liegt jetzt unter `components/warema_cover_hub/`.
+- `transmitter_pin` wird durch einen `remote_transmitter` und `transmitter_id` ersetzt.
+- Die Option `name` des Hubs entfällt.
+- `warema_cover_hub_id` ist bei den Covers optional, wenn es nur einen Hub gibt.
+- Die Bibliothek `rc-switch` wird nicht mehr verwendet.
+
+## Credits
+
+Das Protokoll stammt aus [aircontrol](https://github.com/rfkd/aircontrol) von Ralf Dauberschmidt.
+Damit lassen sich Warema-EWFS-Geräte von einem Raspberry Pi aus steuern.
+
+## Lizenz
+
+[GPL-3.0](LICENSE). Die Positionsberechnung des Covers ist vom
+[`time_based`](https://github.com/esphome/esphome/tree/dev/esphome/components/time_based)-Cover
+von ESPHome abgeleitet, das als Teil des C++-Codes von ESPHome unter GPL-3.0 steht.
