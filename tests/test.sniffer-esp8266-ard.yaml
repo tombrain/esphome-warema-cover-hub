@@ -15,9 +15,9 @@ external_components:
 remote_receiver:
   id: rf_receiver
   pin: D5
-  filter: 200us
+  filter: 400us
   idle: 10ms
-  buffer_size: 2kb
+  buffer_size: 4kb
 
 warema_cover_hub:
   receiver_id: rf_receiver

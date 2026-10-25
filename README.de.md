@@ -142,9 +142,9 @@ Zum Auslesen der Codes reicht ein Aufbau nur mit Empfänger wie dieser:
 remote_receiver:
   id: rf_receiver
   pin: D5             # ESP8266 (GPIO14); beim ESP32 ein beliebiger freier Eingangs-GPIO
-  filter: 200us
+  filter: 400us       # unterdrückt Empfängerrauschen, Warema-Pulse sind mindestens ~800 µs lang
   idle: 10ms          # mindestens 7 ms, ein Sync ist bis zu 6,8 ms lang
-  buffer_size: 2kb    # nur ESP8266
+  buffer_size: 4kb    # nur ESP8266
 
 warema_cover_hub:
   receiver_id: rf_receiver
@@ -169,6 +169,16 @@ Textsensor):
 Übernimm `command`, `devicecode1` und `devicecode2` in die Cover-Konfiguration. Wiederhole das
 für jeden Rollladen bzw. jeden Kanal der Fernbedienung. Ein Kanal, der mehrere Rollläden
 gleichzeitig fährt (z. B. „alle“), hat einen eigenen `command` und wird ein eigenes Cover.
+
+Eine regelmäßige Warnung `Buffer overflow` von `remote_receiver`, z. B. etwa einmal pro Minute,
+stammt meist von anderen 433-MHz-Geräten wie Funk-Temperatursensoren: Ihre Pakete sind länger
+als der Puffer. Verworfen wird nur ihr Signal, du kannst die Warnung also ausblenden:
+
+```yaml
+logger:
+  logs:
+    remote_receiver: ERROR
+```
 
 Neben `OPEN`, `CLOSE` und `STOP` werden die Funktionstasten A, B und C der Fernbedienung als
 `FUNCTION_A` bis `FUNCTION_C` angezeigt. `UNKNOWN` steht für eine Taste, die diese Komponente

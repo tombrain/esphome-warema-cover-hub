@@ -139,9 +139,9 @@ A receiver-only setup like this is enough for reading the codes:
 remote_receiver:
   id: rf_receiver
   pin: D5             # ESP8266 (GPIO14); any free input GPIO on the ESP32
-  filter: 200us
+  filter: 400us       # suppresses receiver noise, Warema pulses are at least ~800 µs
   idle: 10ms          # at least 7 ms, syncs are up to 6.8 ms long
-  buffer_size: 2kb    # ESP8266 only
+  buffer_size: 4kb    # ESP8266 only
 
 warema_cover_hub:
   receiver_id: rf_receiver
@@ -165,6 +165,16 @@ Press a button on the remote near the receiver and watch the log (or the text se
 Copy `command`, `devicecode1` and `devicecode2` into the cover configuration. Repeat this
 for every blind or channel of the remote. A channel that moves several blinds at once
 (e.g. "all") has its own `command` and becomes a cover of its own.
+
+A regular `Buffer overflow` warning of `remote_receiver`, e.g. about once a minute, is
+usually caused by other 433 MHz devices such as weather sensors: their packets are longer than
+the buffer. Only their signal is dropped, so you can hide the warning:
+
+```yaml
+logger:
+  logs:
+    remote_receiver: ERROR
+```
 
 Besides `OPEN`, `CLOSE` and `STOP`, the function keys A, B and C of the remote are shown as
 `FUNCTION_A` to `FUNCTION_C`. `UNKNOWN` means a key this component does not know yet. Please
