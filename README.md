@@ -107,8 +107,15 @@ Turns decoding of received telegrams on and off from Home Assistant. On by defau
 is restored after a reboot. Requires `receiver_id` on the hub. The receiver itself keeps
 listening; the switch only stops decoding and logging.
 
-Takes `warema_cover_hub_id` (needed only with more than one hub) and the base
-[switch options](https://esphome.io/components/switch/#base-switch-configuration).
+### Text sensor: `platform: warema_cover_hub`
+
+Shows the last received telegram, e.g.
+`OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011`.
+Requires `receiver_id` on the hub.
+
+Both take `warema_cover_hub_id` (needed only with more than one hub) and the base
+[switch](https://esphome.io/components/switch/#base-switch-configuration) or
+[text sensor](https://esphome.io/components/text_sensor/#base-text-sensor-configuration) options.
 
 ## Finding the codes
 
@@ -133,13 +140,17 @@ remote_receiver:
 warema_cover_hub:
   receiver_id: rf_receiver
 
-# Optional: turn receiving on and off in Home Assistant
+# Optional: control and show it in Home Assistant
 switch:
   - platform: warema_cover_hub
     name: "Receive Warema codes"
+
+text_sensor:
+  - platform: warema_cover_hub
+    name: "Received Warema code"
 ```
 
-Press a button on the remote near the receiver and watch the log:
+Press a button on the remote near the receiver and watch the log (or the text sensor):
 
 ```
 [I][warema_cover_hub]: Received OPEN: command: 111, devicecode1: 101010010, devicecode2: 101010011

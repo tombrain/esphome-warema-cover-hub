@@ -65,6 +65,17 @@ bool parse_command_type(const std::string &telegram, CommandType *type) {
   return true;
 }
 
+std::string describe_telegram(const std::string &telegram) {
+  if (telegram.length() != TELEGRAM_LENGTH)
+    return "INVALID";
+  CommandType type;
+  std::string description = parse_command_type(telegram, &type) ? command_type_to_str(type) : "UNKNOWN";
+  description.append(", command: ").append(telegram, 9, 3);
+  description.append(", devicecode1: ").append(telegram, 16, 9);
+  description.append(", devicecode2: ").append(telegram, 26, 9);
+  return description;
+}
+
 // Encoding: 'S' = high for SYNC_LENGTH_US, 's' = low for SYNC_LENGTH_US,
 // '0' = high then low, '1' = low then high (each half of BIT_LENGTH_US).
 std::vector<int32_t> encode_telegram(const std::string &telegram) {

@@ -51,3 +51,7 @@ cover:
 switch:
   - platform: warema_cover_hub
     name: "Receive Warema codes"
+
+text_sensor:
+  - platform: warema_cover_hub
+    name: "Received Warema code"

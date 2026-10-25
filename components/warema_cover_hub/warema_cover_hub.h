@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "esphome/core/component.h"
+#include "esphome/core/helpers.h"
 #include "esphome/components/remote_base/remote_base.h"
 
 #include "warema_protocol.h"
@@ -36,6 +37,10 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
     this->number_of_transmissions_ = number_of_transmissions;
   }
   void register_cover(WaremaCover *cover) { this->covers_.push_back(cover); }
+  /// Called with each received telegram, repetitions of the remote only once.
+  template<typename F> void add_on_telegram_callback(F &&callback) {
+    this->telegram_callback_.add(std::forward<F>(callback));
+  }
 
   /// Queues a telegram, e.g. "S01110100111111S000011100S000011101S".
   void send_command(const std::string &telegram);
@@ -60,6 +65,7 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   uint32_t busy_time_{0};
   std::string last_received_telegram_;
   uint32_t last_received_time_{0};
+  CallbackManager<void(const std::string &)> telegram_callback_;
 };
 
 }  // namespace warema_cover_hub

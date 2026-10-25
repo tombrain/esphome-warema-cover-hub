@@ -62,6 +62,14 @@ static void test_parse() {
   CHECK(!parse_command_type("S0111", &type));
 }
 
+static void test_describe() {
+  CHECK(describe_telegram(build_telegram(CommandType::STOP, "110", "101000110", "011001010")) ==
+        "STOP, command: 110, devicecode1: 101000110, devicecode2: 011001010");
+  CHECK(describe_telegram("S00000000000000S000000000S000000000S") ==
+        "UNKNOWN, command: 000, devicecode1: 000000000, devicecode2: 000000000");
+  CHECK(describe_telegram("S0111") == "INVALID");
+}
+
 // All combinations of the bits next to the syncs, where pulses merge
 static void test_round_trip() {
   const CommandType types[] = {CommandType::OPEN, CommandType::CLOSE, CommandType::STOP};
@@ -113,6 +121,7 @@ static void test_incomplete() {
 int main() {
   test_known_telegram();
   test_parse();
+  test_describe();
   test_round_trip();
   test_jitter();
   test_repetitions_and_noise();

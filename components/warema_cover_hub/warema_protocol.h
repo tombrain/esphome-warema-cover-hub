@@ -32,6 +32,10 @@ std::string build_telegram(CommandType type, const std::string &command, const s
 /// Returns false if the telegram is no known command.
 bool parse_command_type(const std::string &telegram, CommandType *type);
 
+/// Describes a telegram with the values of the cover configuration, e.g.
+/// "OPEN, command: 111, devicecode1: 000011100, devicecode2: 000011101".
+std::string describe_telegram(const std::string &telegram);
+
 /// Converts a telegram into raw timings in microseconds (positive = high, negative = low).
 std::vector<int32_t> encode_telegram(const std::string &telegram);
 

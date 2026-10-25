@@ -94,12 +94,9 @@ void WaremaCoverHub::handle_telegram_(const std::string &telegram) {
   if (repeated)
     return;
 
-  CommandType type;
-  const bool known = parse_command_type(telegram, &type);
-  ESP_LOGI(TAG, "Received %s: command: %s, devicecode1: %s, devicecode2: %s",
-           known ? command_type_to_str(type) : "UNKNOWN", telegram.substr(9, 3).c_str(), telegram.substr(16, 9).c_str(),
-           telegram.substr(26, 9).c_str());
+  ESP_LOGI(TAG, "Received %s", describe_telegram(telegram).c_str());
   ESP_LOGD(TAG, "Received telegram '%s'", telegram.c_str());
+  this->telegram_callback_.call(telegram);
 }
 
 }  // namespace warema_cover_hub

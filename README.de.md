@@ -108,8 +108,15 @@ Schaltet das Dekodieren empfangener Telegramme in Home Assistant ein und aus. St
 der Zustand bleibt nach einem Neustart erhalten. Braucht `receiver_id` am Hub. Der Empfänger
 selbst lauscht weiter, der Schalter beendet nur das Dekodieren und Loggen.
 
-Kennt `warema_cover_hub_id` (nur bei mehr als einem Hub nötig) und die
-[Basis-Optionen für Schalter](https://esphome.io/components/switch/#base-switch-configuration).
+### Textsensor: `platform: warema_cover_hub`
+
+Zeigt das zuletzt empfangene Telegramm an, z. B.
+`OPEN, command: 111, devicecode1: 101010010, devicecode2: 101010011`.
+Braucht `receiver_id` am Hub.
+
+Beide kennen `warema_cover_hub_id` (nur bei mehr als einem Hub nötig) und die Basis-Optionen für
+[Schalter](https://esphome.io/components/switch/#base-switch-configuration) bzw.
+[Textsensoren](https://esphome.io/components/text_sensor/#base-text-sensor-configuration).
 
 ## Codes auslesen
 
@@ -135,13 +142,18 @@ remote_receiver:
 warema_cover_hub:
   receiver_id: rf_receiver
 
-# Optional: Empfang in Home Assistant ein- und ausschalten
+# Optional: in Home Assistant schalten und anzeigen
 switch:
   - platform: warema_cover_hub
     name: "Warema Codes empfangen"
+
+text_sensor:
+  - platform: warema_cover_hub
+    name: "Empfangener Warema Code"
 ```
 
-Drücke in der Nähe des Empfängers eine Taste der Fernbedienung und beobachte das Log:
+Drücke in der Nähe des Empfängers eine Taste der Fernbedienung und beobachte das Log (oder den
+Textsensor):
 
 ```
 [I][warema_cover_hub]: Received OPEN: command: 111, devicecode1: 101010010, devicecode2: 101010011
