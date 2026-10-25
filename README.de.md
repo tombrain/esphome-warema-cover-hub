@@ -98,11 +98,16 @@ OPEN.
 | `devicecode2` | ja | Zweiter 9-Bit-Gerätecode. |
 | `open_duration` | ja | Zeit zum vollständigen Öffnen. |
 | `close_duration` | ja | Zeit zum vollständigen Schließen. |
+| `reverse_delay` | nein | Pause vor dem Umkehren eines fahrenden Covers, Standard `1s`. Siehe unten. |
 
 Dazu kommen alle [Basis-Optionen für Covers](https://esphome.io/components/cover/#base-cover-configuration).
 
 Die Laufzeiten misst du am einfachsten mit der Stoppuhr: Rollladen einmal ganz öffnen und einmal
 ganz schließen. Die beiden Zeiten können sich unterscheiden.
+
+Ein Warema-Empfänger bleibt stehen, wenn er während der Fahrt den Gegenbefehl bekommt. Um ein
+fahrendes Cover umzukehren, sendet die Komponente deshalb zuerst STOP und die neue Richtung erst,
+wenn alle STOP-Wiederholungen gesendet sind und `reverse_delay` vergangen ist.
 
 ### Schalter: `platform: warema_cover_hub`
 

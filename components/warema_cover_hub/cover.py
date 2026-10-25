@@ -10,6 +10,7 @@ from . import CONF_WAREMA_COVER_HUB_ID, WaremaCoverHub, warema_cover_hub_ns
 CONF_DEVICECODE1 = "devicecode1"
 CONF_DEVICECODE2 = "devicecode2"
 CONF_COMMAND = "command"
+CONF_REVERSE_DELAY = "reverse_delay"
 
 WaremaCover = warema_cover_hub_ns.class_(
     "WaremaCover",
@@ -48,6 +49,9 @@ CONFIG_SCHEMA = (
             cv.Required(CONF_DEVICECODE1): validate_binary_string(9),
             cv.Required(CONF_DEVICECODE2): validate_binary_string(9),
             cv.Required(CONF_COMMAND): validate_binary_string(3),
+            cv.Optional(
+                CONF_REVERSE_DELAY, default="1s"
+            ): cv.positive_time_period_milliseconds,
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -67,3 +71,4 @@ async def to_code(config):
     cg.add(var.set_devicecode1(config[CONF_DEVICECODE1]))
     cg.add(var.set_devicecode2(config[CONF_DEVICECODE2]))
     cg.add(var.set_command(config[CONF_COMMAND]))
+    cg.add(var.set_reverse_delay(config[CONF_REVERSE_DELAY]))

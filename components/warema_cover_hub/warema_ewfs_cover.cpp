@@ -18,6 +18,7 @@ void WaremaCover::dump_config() {
   LOG_COVER("", "Warema EWFS Cover", this);
   ESP_LOGCONFIG(TAG, "  Open Duration: %.1fs", this->open_duration_ / 1e3f);
   ESP_LOGCONFIG(TAG, "  Close Duration: %.1fs", this->close_duration_ / 1e3f);
+  ESP_LOGCONFIG(TAG, "  Reverse Delay: %.1fs", this->reverse_delay_ / 1e3f);
   ESP_LOGCONFIG(TAG, "  Command: %s", this->command_.c_str());
   ESP_LOGCONFIG(TAG, "  Devicecode 1: %s", this->devicecode1_.c_str());
   ESP_LOGCONFIG(TAG, "  Devicecode 2: %s", this->devicecode2_.c_str());
@@ -36,6 +37,10 @@ void WaremaCover::setup() {
 }
 
 void WaremaCover::loop() {
+  if (this->reverse_direction_ != COVER_OPERATION_IDLE) {
+    this->finish_reverse_();
+    return;
+  }
   if (this->current_operation == COVER_OPERATION_IDLE)
     return;
 
@@ -116,8 +121,25 @@ bool WaremaCover::is_at_target_() const {
 }
 
 void WaremaCover::start_direction_(CoverOperation dir) {
+  if (this->reverse_direction_ != COVER_OPERATION_IDLE) {
+    // A reverse is pending: the same direction keeps waiting, anything else cancels it
+    if (dir == this->reverse_direction_)
+      return;
+    this->reverse_direction_ = COVER_OPERATION_IDLE;
+  }
   if (dir == this->current_operation && dir != COVER_OPERATION_IDLE)
     return;
+
+  if (dir != COVER_OPERATION_IDLE && this->current_operation != COVER_OPERATION_IDLE) {
+    // The receiver would only stop on the opposite command, so stop first
+    ESP_LOGD(TAG, "'%s' reversing, stopping first", this->get_name().c_str());
+    this->start_direction_(COVER_OPERATION_IDLE);
+    this->reverse_direction_ = dir;
+    this->reverse_stop_telegram_ = this->build_telegram_(CommandType::STOP);
+    this->reverse_stop_sent_ = false;
+    this->publish_state();
+    return;
+  }
 
   this->recompute_position_();
   switch (dir) {
@@ -140,6 +162,25 @@ void WaremaCover::start_direction_(CoverOperation dir) {
   this->last_operation_ = dir;
   this->current_operation = dir;
   this->last_recompute_time_ = millis();
+}
+
+// Starts the pending direction once the STOP has been sent and the reverse delay has passed.
+void WaremaCover::finish_reverse_() {
+  if (this->parent_->is_sending(this->reverse_stop_telegram_))
+    return;
+
+  const uint32_t now = millis();
+  if (!this->reverse_stop_sent_) {
+    this->reverse_stop_sent_ = true;
+    this->reverse_stop_sent_time_ = now;
+  }
+  if (now - this->reverse_stop_sent_time_ < this->reverse_delay_)
+    return;
+
+  const CoverOperation dir = this->reverse_direction_;
+  this->reverse_direction_ = COVER_OPERATION_IDLE;
+  this->start_direction_(dir);
+  this->publish_state();
 }
 
 void WaremaCover::recompute_position_() {

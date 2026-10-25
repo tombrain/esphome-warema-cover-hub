@@ -207,6 +207,14 @@ bool TelegramQueue::push(const std::string &telegram, uint8_t transmissions) {
   return true;
 }
 
+bool TelegramQueue::contains(const std::string &telegram) const {
+  for (const auto &entry : this->entries_) {
+    if (entry.telegram == telegram)
+      return true;
+  }
+  return false;
+}
+
 std::string TelegramQueue::pop() {
   if (this->entries_.empty())
     return {};

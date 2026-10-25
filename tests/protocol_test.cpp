@@ -186,6 +186,20 @@ static void test_queue_replaces_pending_command() {
   CHECK(others == 9);  // the other cover keeps its remaining repetitions
 }
 
+static void test_queue_contains() {
+  const std::string stop = build_telegram(CommandType::STOP, "111", "010001011", "010001100");
+  const std::string close = build_telegram(CommandType::CLOSE, "111", "010001011", "010001100");
+  TelegramQueue queue;
+  CHECK(!queue.contains(stop));
+  queue.push(stop, 2);
+  CHECK(queue.contains(stop));
+  CHECK(!queue.contains(close));
+  queue.pop();
+  CHECK(queue.contains(stop));  // one transmission left
+  queue.pop();
+  CHECK(!queue.contains(stop));
+}
+
 static void test_echo_filter() {
   const std::string open = build_telegram(CommandType::OPEN, "111", "010001011", "010001100");
   const std::string stop = build_telegram(CommandType::STOP, "111", "010001011", "010001100");
@@ -229,6 +243,7 @@ int main() {
   test_queue_round_robin();
   test_queue_replaces_pending_command();
   test_queue_limit();
+  test_queue_contains();
   if (failures == 0)
     std::printf("All tests passed\n");
   return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

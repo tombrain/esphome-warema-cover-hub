@@ -24,6 +24,7 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   void set_devicecode1(const std::string &devicecode1) { this->devicecode1_ = devicecode1; }
   void set_devicecode2(const std::string &devicecode2) { this->devicecode2_ = devicecode2; }
   void set_command(const std::string &command) { this->command_ = command; }
+  void set_reverse_delay(uint32_t reverse_delay) { this->reverse_delay_ = reverse_delay; }
 
   cover::CoverTraits get_traits() override;
 
@@ -31,6 +32,7 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   void control(const cover::CoverCall &call) override;
   bool is_at_target_() const;
   void start_direction_(cover::CoverOperation dir);
+  void finish_reverse_();
   void recompute_position_();
   std::string build_telegram_(CommandType type) const;
 
@@ -44,6 +46,14 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   bool has_built_in_endstop_{true};
 
   cover::CoverOperation last_operation_{cover::COVER_OPERATION_OPENING};
+
+  // The receiver treats the opposite command as STOP, so reversing is STOP, then the new
+  // direction once the STOP is sent and reverse_delay_ has passed.
+  uint32_t reverse_delay_{1000};
+  cover::CoverOperation reverse_direction_{cover::COVER_OPERATION_IDLE};
+  std::string reverse_stop_telegram_;
+  bool reverse_stop_sent_{false};
+  uint32_t reverse_stop_sent_time_{0};
 
   std::string command_;
   std::string devicecode1_;

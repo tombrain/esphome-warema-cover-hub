@@ -59,6 +59,8 @@ class TelegramQueue {
   bool push(const std::string &telegram, uint8_t transmissions);
   bool empty() const { return this->entries_.empty(); }
   size_t size() const { return this->entries_.size(); }
+  /// True while the telegram has transmissions left.
+  bool contains(const std::string &telegram) const;
   /// Returns the next telegram to send (empty if none) and requeues it if it has
   /// transmissions left.
   std::string pop();

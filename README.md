@@ -96,11 +96,16 @@ pending repetitions, so a STOP is never followed by a leftover OPEN.
 | `devicecode2` | yes | Second 9-bit device code. |
 | `open_duration` | yes | Time to fully open. |
 | `close_duration` | yes | Time to fully close. |
+| `reverse_delay` | no | Pause before reversing a moving cover, default `1s`. See below. |
 
 Plus all [base cover options](https://esphome.io/components/cover/#base-cover-configuration).
 
 The easiest way to get the durations is a stopwatch: open the blind fully once and close it
 fully once. The two times may differ.
+
+A Warema receiver stops when it gets the opposite command while moving. So to reverse a
+moving cover, the component sends STOP first and the new direction after all STOP
+repetitions are sent and `reverse_delay` has passed.
 
 ### Switch: `platform: warema_cover_hub`
 
