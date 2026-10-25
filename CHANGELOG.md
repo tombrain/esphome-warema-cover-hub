@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-25
+
 ### Added
 
 - Covers follow the keys pressed on the original remote (`follow_remote`, default on), so
@@ -13,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   motor does. Nothing is sent for this.
 - Cover option `members` for channels that move several blinds, e.g. "all": the members
   follow the channel, from Home Assistant or the remote, without sending anything.
-
 - Hub trigger `on_unassigned` for received telegrams of channels without cover or event, with
   `key`, `command`, `devicecode1`, `devicecode2` and `description`, e.g. to notify about a new
   remote in Home Assistant.
@@ -100,7 +101,8 @@ First release as an ESPHome external component.
 
 First tagged version, before the restructuring.
 
-[Unreleased]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.0.0...v1.0.1
