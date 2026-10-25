@@ -97,3 +97,9 @@ configuration increase the major version. See the
 - The hub's `name` option is gone.
 - `warema_cover_hub_id` on covers is optional when there is only one hub.
 - The `rc-switch` library is no longer used.
+
+## License
+
+[GPL-3.0](LICENSE). The position tracking of the cover is derived from ESPHome's
+[`time_based`](https://github.com/esphome/esphome/tree/dev/esphome/components/time_based) cover,
+which is licensed under GPL-3.0 as part of ESPHome's C++ code.
