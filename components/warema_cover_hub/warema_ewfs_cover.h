@@ -25,6 +25,7 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   void set_devicecode2(const std::string &devicecode2) { this->devicecode2_ = devicecode2; }
   void set_command(const std::string &command) { this->command_ = command; }
   void set_reverse_delay(uint32_t reverse_delay) { this->reverse_delay_ = reverse_delay; }
+  void set_follow_remote(bool follow_remote) { this->follow_remote_ = follow_remote; }
 
   cover::CoverTraits get_traits() override;
 
@@ -32,6 +33,10 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   bool is_addressed_by(const std::string &telegram) const { return same_receiver(telegram, this->address_telegram()); }
   /// Any telegram with this cover's command and device codes, for comparing receivers.
   std::string address_telegram() const { return this->build_telegram_(CommandType::STOP); }
+
+  /// Tracks a command the motor received from elsewhere (e.g. the original remote) without
+  /// sending anything. Mirrors the receiver: the opposite command stops a moving cover.
+  void follow_command(CommandType type);
 
  protected:
   void control(const cover::CoverCall &call) override;
@@ -59,6 +64,8 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   std::string reverse_stop_telegram_;
   bool reverse_stop_sent_{false};
   uint32_t reverse_stop_sent_time_{0};
+
+  bool follow_remote_{true};
 
   std::string command_;
   std::string devicecode1_;

@@ -99,6 +99,7 @@ OPEN.
 | `open_duration` | ja | Zeit zum vollständigen Öffnen. |
 | `close_duration` | ja | Zeit zum vollständigen Schließen. |
 | `reverse_delay` | nein | Pause vor dem Umkehren eines fahrenden Covers, Standard `1s`. Siehe unten. |
+| `follow_remote` | nein | Tastendrücke der Original-Fernbedienung nachverfolgen, Standard `true`. Siehe unten. |
 
 Dazu kommen alle [Basis-Optionen für Covers](https://esphome.io/components/cover/#base-cover-configuration).
 
@@ -108,6 +109,12 @@ ganz schließen. Die beiden Zeiten können sich unterscheiden.
 Ein Warema-Empfänger bleibt stehen, wenn er während der Fahrt den Gegenbefehl bekommt. Um ein
 fahrendes Cover umzukehren, sendet die Komponente deshalb zuerst STOP und die neue Richtung erst,
 wenn alle STOP-Wiederholungen gesendet sind und `reverse_delay` vergangen ist.
+
+Hat der Hub einen Empfänger, folgt ein Cover den Tasten der Original-Fernbedienung, damit sein
+Zustand in Home Assistant stimmt: HOCH und RUNTER starten es, die Gegentaste oder STOPP hält es an,
+genau wie beim Motor. Dabei wird nichts gesendet. Noch ausstehende Wiederholungen eines eigenen
+Befehls für das Cover werden verworfen, damit sie die Fernbedienung nicht übersteuern. Mit
+`follow_remote: false` lässt sich das pro Cover abschalten.
 
 ### Schalter: `platform: warema_cover_hub`
 

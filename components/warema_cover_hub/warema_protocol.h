@@ -68,6 +68,8 @@ class TelegramQueue {
   size_t size() const { return this->entries_.size(); }
   /// True while the telegram has transmissions left.
   bool contains(const std::string &telegram) const;
+  /// Drops pending telegrams for the receiver of the given telegram.
+  void remove_receiver(const std::string &telegram);
   /// Returns the next telegram to send (empty if none) and requeues it if it has
   /// transmissions left.
   std::string pop();

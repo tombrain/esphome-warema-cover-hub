@@ -19,6 +19,7 @@ void WaremaCover::dump_config() {
   ESP_LOGCONFIG(TAG, "  Open Duration: %.1fs", this->open_duration_ / 1e3f);
   ESP_LOGCONFIG(TAG, "  Close Duration: %.1fs", this->close_duration_ / 1e3f);
   ESP_LOGCONFIG(TAG, "  Reverse Delay: %.1fs", this->reverse_delay_ / 1e3f);
+  ESP_LOGCONFIG(TAG, "  Follow Remote: %s", YESNO(this->follow_remote_));
   ESP_LOGCONFIG(TAG, "  Command: %s", this->command_.c_str());
   ESP_LOGCONFIG(TAG, "  Devicecode 1: %s", this->devicecode1_.c_str());
   ESP_LOGCONFIG(TAG, "  Devicecode 2: %s", this->devicecode2_.c_str());
@@ -33,6 +34,14 @@ void WaremaCover::setup() {
     restore->apply(this);
   } else {
     this->position = 0.5f;
+  }
+
+  if (this->follow_remote_) {
+    this->parent_->add_on_telegram_callback([this](const std::string &telegram, const std::string & /*description*/) {
+      CommandType type;
+      if (this->is_addressed_by(telegram) && parse_command_type(telegram, &type))
+        this->follow_command(type);
+    });
   }
 }
 
@@ -164,6 +173,43 @@ void WaremaCover::start_direction_(CoverOperation dir) {
     this->last_operation_ = dir;
   this->current_operation = dir;
   this->last_recompute_time_ = millis();
+}
+
+void WaremaCover::follow_command(CommandType type) {
+  CoverOperation dir;
+  switch (type) {
+    case CommandType::OPEN:
+      dir = COVER_OPERATION_OPENING;
+      break;
+    case CommandType::CLOSE:
+      dir = COVER_OPERATION_CLOSING;
+      break;
+    case CommandType::STOP:
+      dir = COVER_OPERATION_IDLE;
+      break;
+    default:
+      return;  // function keys do not move the cover
+  }
+
+  // The motor got a newer command: our pending repetitions and a pending reverse would override it
+  this->parent_->cancel_pending(this->address_telegram());
+  this->reverse_direction_ = COVER_OPERATION_IDLE;
+
+  CoverOperation next = dir;
+  if (dir != COVER_OPERATION_IDLE && this->current_operation != COVER_OPERATION_IDLE)
+    next = dir == this->current_operation ? dir : COVER_OPERATION_IDLE;  // opposite command stops
+  if (next == this->current_operation)
+    return;
+
+  ESP_LOGD(TAG, "'%s' follows %s from elsewhere", this->get_name().c_str(), command_type_to_str(type));
+  this->recompute_position_();
+  if (next != COVER_OPERATION_IDLE) {
+    this->target_position_ = next == COVER_OPERATION_OPENING ? COVER_OPEN : COVER_CLOSED;
+    this->last_operation_ = next;
+  }
+  this->current_operation = next;
+  this->last_recompute_time_ = millis();
+  this->publish_state();
 }
 
 // Starts the pending direction once the STOP has been sent and the reverse delay has passed.

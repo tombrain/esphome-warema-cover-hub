@@ -47,6 +47,8 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   void send_command(const std::string &telegram);
   /// True while the telegram has transmissions left.
   bool is_sending(const std::string &telegram) const { return this->queue_.contains(telegram); }
+  /// Drops pending telegrams for the receiver of the given telegram.
+  void cancel_pending(const std::string &telegram) { this->queue_.remove_receiver(telegram); }
 
  protected:
   /// Sends one telegram and returns its duration in microseconds.

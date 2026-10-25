@@ -231,7 +231,7 @@ bool same_receiver(const std::string &a, const std::string &b) {
   return a.compare(9, 3, b, 9, 3) == 0 && a.compare(15, std::string::npos, b, 15, std::string::npos) == 0;
 }
 
-bool TelegramQueue::push(const std::string &telegram, uint8_t transmissions) {
+void TelegramQueue::remove_receiver(const std::string &telegram) {
   for (auto it = this->entries_.begin(); it != this->entries_.end();) {
     if (same_receiver(it->telegram, telegram)) {
       it = this->entries_.erase(it);
@@ -239,6 +239,10 @@ bool TelegramQueue::push(const std::string &telegram, uint8_t transmissions) {
       ++it;
     }
   }
+}
+
+bool TelegramQueue::push(const std::string &telegram, uint8_t transmissions) {
+  this->remove_receiver(telegram);
   if (transmissions == 0)
     return true;
   if (this->entries_.size() >= MAX_ENTRIES)

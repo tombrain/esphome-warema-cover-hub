@@ -11,6 +11,7 @@ CONF_DEVICECODE1 = "devicecode1"
 CONF_DEVICECODE2 = "devicecode2"
 CONF_COMMAND = "command"
 CONF_REVERSE_DELAY = "reverse_delay"
+CONF_FOLLOW_REMOTE = "follow_remote"
 
 WaremaCover = warema_cover_hub_ns.class_(
     "WaremaCover",
@@ -52,6 +53,7 @@ CONFIG_SCHEMA = (
             cv.Optional(
                 CONF_REVERSE_DELAY, default="1s"
             ): cv.positive_time_period_milliseconds,
+            cv.Optional(CONF_FOLLOW_REMOTE, default=True): cv.boolean,
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -72,3 +74,4 @@ async def to_code(config):
     cg.add(var.set_devicecode2(config[CONF_DEVICECODE2]))
     cg.add(var.set_command(config[CONF_COMMAND]))
     cg.add(var.set_reverse_delay(config[CONF_REVERSE_DELAY]))
+    cg.add(var.set_follow_remote(config[CONF_FOLLOW_REMOTE]))

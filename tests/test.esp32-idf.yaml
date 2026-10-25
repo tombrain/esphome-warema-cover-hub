@@ -43,6 +43,7 @@ cover:
 
   - platform: warema_cover_hub
     name: "Cover 2"
+    follow_remote: false
     command: "110"
     devicecode1: "101010010"
     devicecode2: "101010011"

@@ -97,6 +97,7 @@ pending repetitions, so a STOP is never followed by a leftover OPEN.
 | `open_duration` | yes | Time to fully open. |
 | `close_duration` | yes | Time to fully close. |
 | `reverse_delay` | no | Pause before reversing a moving cover, default `1s`. See below. |
+| `follow_remote` | no | Track keys pressed on the original remote, default `true`. See below. |
 
 Plus all [base cover options](https://esphome.io/components/cover/#base-cover-configuration).
 
@@ -106,6 +107,12 @@ fully once. The two times may differ.
 A Warema receiver stops when it gets the opposite command while moving. So to reverse a
 moving cover, the component sends STOP first and the new direction after all STOP
 repetitions are sent and `reverse_delay` has passed.
+
+With a receiver on the hub, a cover follows the keys pressed on the original remote, so its
+state in Home Assistant stays right: UP and DOWN start it, the opposite key or STOP stops it,
+like the motor does. Nothing is sent for this. Pending repetitions of an own command for the
+cover are dropped, so they cannot override the remote. Set `follow_remote: false` to turn
+this off for a cover.
 
 ### Switch: `platform: warema_cover_hub`
 
