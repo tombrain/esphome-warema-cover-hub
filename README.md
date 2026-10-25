@@ -101,6 +101,15 @@ Plus all [base cover options](https://esphome.io/components/cover/#base-cover-co
 The easiest way to get the durations is a stopwatch: open the blind fully once and close it
 fully once. The two times may differ.
 
+### Switch: `platform: warema_cover_hub`
+
+Turns decoding of received telegrams on and off from Home Assistant. On by default, the state
+is restored after a reboot. Requires `receiver_id` on the hub. The receiver itself keeps
+listening; the switch only stops decoding and logging.
+
+Takes `warema_cover_hub_id` (needed only with more than one hub) and the base
+[switch options](https://esphome.io/components/switch/#base-switch-configuration).
+
 ## Finding the codes
 
 Each blind is addressed by three codes, which you read from its original remote. The hub can
@@ -123,6 +132,11 @@ remote_receiver:
 
 warema_cover_hub:
   receiver_id: rf_receiver
+
+# Optional: turn receiving on and off in Home Assistant
+switch:
+  - platform: warema_cover_hub
+    name: "Receive Warema codes"
 ```
 
 Press a button on the remote near the receiver and watch the log:

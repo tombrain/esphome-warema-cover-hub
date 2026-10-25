@@ -102,6 +102,15 @@ Dazu kommen alle [Basis-Optionen für Covers](https://esphome.io/components/cove
 Die Laufzeiten misst du am einfachsten mit der Stoppuhr: Rollladen einmal ganz öffnen und einmal
 ganz schließen. Die beiden Zeiten können sich unterscheiden.
 
+### Schalter: `platform: warema_cover_hub`
+
+Schaltet das Dekodieren empfangener Telegramme in Home Assistant ein und aus. Standardmäßig an,
+der Zustand bleibt nach einem Neustart erhalten. Braucht `receiver_id` am Hub. Der Empfänger
+selbst lauscht weiter, der Schalter beendet nur das Dekodieren und Loggen.
+
+Kennt `warema_cover_hub_id` (nur bei mehr als einem Hub nötig) und die
+[Basis-Optionen für Schalter](https://esphome.io/components/switch/#base-switch-configuration).
+
 ## Codes auslesen
 
 Jeder Rollladen wird über drei Codes angesprochen, die du von seiner Original-Fernbedienung
@@ -125,6 +134,11 @@ remote_receiver:
 
 warema_cover_hub:
   receiver_id: rf_receiver
+
+# Optional: Empfang in Home Assistant ein- und ausschalten
+switch:
+  - platform: warema_cover_hub
+    name: "Warema Codes empfangen"
 ```
 
 Drücke in der Nähe des Empfängers eine Taste der Fernbedienung und beobachte das Log:

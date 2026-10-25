@@ -21,3 +21,7 @@ remote_receiver:
 
 warema_cover_hub:
   receiver_id: rf_receiver
+
+switch:
+  - platform: warema_cover_hub
+    name: "Receive Warema codes"

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Decoding of telegrams from the original remote with an optional `remote_receiver`
   (`receiver_id` on the hub). Received codes are logged, ready to copy into a cover.
 - A hub without transmitter works as a receiver-only sniffer; `transmitter_id` is optional now.
+- Switch platform to turn decoding of received telegrams on and off from Home Assistant.
 - README: reading the codes, setup photo, credits, German translation.
 
 ## [1.0.1] - 2026-10-25

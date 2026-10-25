@@ -74,6 +74,8 @@ uint32_t WaremaCoverHub::transmit_(const std::string &telegram) {
 }
 
 bool WaremaCoverHub::on_receive(remote_base::RemoteReceiveData data) {
+  if (!this->receiving_)
+    return false;
   if (!this->queue_.empty() || millis() - this->last_transmit_time_ < this->busy_time_ + RECEIVE_HOLDOFF_MS)
     return false;
 

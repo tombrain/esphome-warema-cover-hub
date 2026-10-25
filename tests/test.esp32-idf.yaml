@@ -47,3 +47,7 @@ cover:
     devicecode2: "101010011"
     open_duration: 16s
     close_duration: 18s
+
+switch:
+  - platform: warema_cover_hub
+    name: "Receive Warema codes"
