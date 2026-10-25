@@ -79,6 +79,7 @@ A complete example is in [example.yaml](example.yaml).
 | `transmitter_id` | no* | | ID of the `remote_transmitter` to send with. |
 | `receiver_id` | no* | | ID of a `remote_receiver`. Received telegrams are logged, see [Finding the codes](#finding-the-codes). Own transmissions are filtered out. |
 | `number_of_transmissions` | no | `3` | How often each telegram is sent (1–10). |
+| `on_unassigned` | no | | Automation for received telegrams of channels without cover or event. See below. |
 
 \* At least one of `transmitter_id` and `receiver_id` is required.
 
@@ -255,6 +256,42 @@ logger:
 Besides `OPEN`, `CLOSE` and `STOP`, the function keys A, B and C of the remote are shown as
 `FUNCTION_A` to `FUNCTION_C`. `UNKNOWN` means a key this component does not know yet. Please
 open an issue with the telegram from the debug log.
+
+### Reacting to unassigned codes
+
+`on_unassigned` on the hub runs for each key pressed on a channel that has no cover and no
+event, e.g. a new remote. It provides the strings `key` (`open`, `close`, `stop`,
+`function_a` to `function_c` or `unknown`), `command`, `devicecode1`, `devicecode2` and
+`description`. For example, to get a notification in Home Assistant:
+
+```yaml
+warema_cover_hub:
+  receiver_id: rf_receiver
+  on_unassigned:
+    - homeassistant.event:
+        event: esphome.warema_unassigned
+        data:
+          key: !lambda "return key;"
+          command: !lambda "return command;"
+          devicecode1: !lambda "return devicecode1;"
+          devicecode2: !lambda "return devicecode2;"
+```
+
+```yaml
+# Home Assistant automation
+triggers:
+  - trigger: event
+    event_type: esphome.warema_unassigned
+actions:
+  - action: notify.notify
+    data:
+      message: >-
+        New Warema code: {{ trigger.event.data.key }}, command: {{ trigger.event.data.command }},
+        devicecode1: {{ trigger.event.data.devicecode1 }}, devicecode2: {{ trigger.event.data.devicecode2 }}
+```
+
+`homeassistant.event` requires the option "Allow the device to perform Home Assistant
+actions" of the device in the ESPHome integration.
 
 ### Protocol
 

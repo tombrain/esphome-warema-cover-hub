@@ -106,6 +106,20 @@ void WaremaCoverHub::handle_telegram_(const std::string &telegram) {
   }
   ESP_LOGD(TAG, "Received telegram '%s'", telegram.c_str());
   this->telegram_callback_.call(telegram, description);
+  if (!this->is_assigned_(telegram))
+    this->unassigned_callback_.call(telegram, description);
+}
+
+bool WaremaCoverHub::is_assigned_(const std::string &telegram) const {
+  for (const auto *cover : this->covers_) {
+    if (cover->is_addressed_by(telegram))
+      return true;
+  }
+  for (const auto &channel : this->channels_) {
+    if (same_receiver(telegram, channel))
+      return true;
+  }
+  return false;
 }
 
 std::string WaremaCoverHub::describe_received_(const std::string &telegram) const {

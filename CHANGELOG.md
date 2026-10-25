@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cover option `members` for channels that move several blinds, e.g. "all": the members
   follow the channel, from Home Assistant or the remote, without sending anything.
 
+- Hub trigger `on_unassigned` for received telegrams of channels without cover or event, with
+  `key`, `command`, `devicecode1`, `devicecode2` and `description`, e.g. to notify about a new
+  remote in Home Assistant.
 - Default names for the switch ("Show Warema codes") and the text sensor ("Received Warema
   code"), so `name` can be left out.
 

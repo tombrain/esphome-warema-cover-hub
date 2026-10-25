@@ -80,6 +80,7 @@ Ein vollständiges Beispiel findest du in [example.yaml](example.yaml).
 | `transmitter_id` | nein* | | ID des `remote_transmitter`, über den gesendet wird. |
 | `receiver_id` | nein* | | ID eines `remote_receiver`. Empfangene Telegramme werden geloggt, siehe [Codes auslesen](#codes-auslesen). Eigene Sendungen werden herausgefiltert. |
 | `number_of_transmissions` | nein | `3` | Wie oft jedes Telegramm gesendet wird (1–10). |
+| `on_unassigned` | nein | | Automation für empfangene Telegramme von Kanälen ohne Cover oder Event. Siehe unten. |
 
 \* Mindestens eine der Optionen `transmitter_id` und `receiver_id` ist nötig.
 
@@ -263,6 +264,42 @@ logger:
 Neben `OPEN`, `CLOSE` und `STOP` werden die Funktionstasten A, B und C der Fernbedienung als
 `FUNCTION_A` bis `FUNCTION_C` angezeigt. `UNKNOWN` steht für eine Taste, die diese Komponente
 noch nicht kennt. Eröffne dann bitte ein Issue mit dem Telegramm aus dem Debug-Log.
+
+### Auf nicht zugeordnete Codes reagieren
+
+`on_unassigned` am Hub läuft bei jedem Tastendruck auf einem Kanal, der weder ein Cover noch ein
+Event hat, z. B. bei einer neuen Fernbedienung. Zur Verfügung stehen die Texte `key` (`open`,
+`close`, `stop`, `function_a` bis `function_c` oder `unknown`), `command`, `devicecode1`,
+`devicecode2` und `description`. Zum Beispiel für eine Benachrichtigung in Home Assistant:
+
+```yaml
+warema_cover_hub:
+  receiver_id: rf_receiver
+  on_unassigned:
+    - homeassistant.event:
+        event: esphome.warema_unassigned
+        data:
+          key: !lambda "return key;"
+          command: !lambda "return command;"
+          devicecode1: !lambda "return devicecode1;"
+          devicecode2: !lambda "return devicecode2;"
+```
+
+```yaml
+# Automation in Home Assistant
+triggers:
+  - trigger: event
+    event_type: esphome.warema_unassigned
+actions:
+  - action: notify.notify
+    data:
+      message: >-
+        Neuer Warema-Code: {{ trigger.event.data.key }}, command: {{ trigger.event.data.command }},
+        devicecode1: {{ trigger.event.data.devicecode1 }}, devicecode2: {{ trigger.event.data.devicecode2 }}
+```
+
+Für `homeassistant.event` muss in der ESPHome-Integration beim Gerät die Option „Dem Gerät erlauben,
+Home-Assistant-Aktionen auszuführen“ aktiviert sein.
 
 ### Protokoll
 

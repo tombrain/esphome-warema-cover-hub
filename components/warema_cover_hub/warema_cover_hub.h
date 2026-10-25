@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "esphome/core/automation.h"
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 #include "esphome/components/remote_base/remote_base.h"
@@ -39,10 +40,16 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
     this->number_of_transmissions_ = number_of_transmissions;
   }
   void register_cover(WaremaCover *cover) { this->covers_.push_back(cover); }
+  /// Marks a channel as assigned (e.g. by an event), given by any telegram of it.
+  void register_channel(const std::string &telegram) { this->channels_.push_back(telegram); }
   /// Called with each received telegram and its description (with the matching covers),
   /// repetitions of the remote only once.
   template<typename F> void add_on_telegram_callback(F &&callback) {
     this->telegram_callback_.add(std::forward<F>(callback));
+  }
+  /// Like add_on_telegram_callback, but only for telegrams of channels without cover or event.
+  template<typename F> void add_on_unassigned_callback(F &&callback) {
+    this->unassigned_callback_.add(std::forward<F>(callback));
   }
 
   /// Queues a telegram, e.g. "S01110100111111S000011100S000011101S".
@@ -58,12 +65,14 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   void handle_telegram_(const std::string &telegram);
   /// Describes a received telegram including the names of the covers it addresses.
   std::string describe_received_(const std::string &telegram) const;
+  bool is_assigned_(const std::string &telegram) const;
 
   remote_base::RemoteTransmitterBase *transmitter_{nullptr};
   bool has_receiver_{false};
   bool show_codes_{true};
   uint8_t number_of_transmissions_{3};
   std::vector<WaremaCover *> covers_{};
+  std::vector<std::string> channels_{};
   TelegramQueue queue_;
   uint32_t last_transmit_time_{0};
   uint32_t busy_time_{0};
@@ -71,6 +80,19 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   uint32_t last_received_time_{0};
   EchoFilter echo_filter_;
   CallbackManager<void(const std::string &, const std::string &)> telegram_callback_;
+  CallbackManager<void(const std::string &, const std::string &)> unassigned_callback_;
+};
+
+/// Fires for received telegrams of channels that have no cover or event, e.g. a new remote.
+class UnassignedTrigger : public Trigger<std::string, std::string, std::string, std::string, std::string> {
+ public:
+  explicit UnassignedTrigger(WaremaCoverHub *parent) {
+    parent->add_on_unassigned_callback([this](const std::string &telegram, const std::string &description) {
+      CommandType type;
+      const char *key = parse_command_type(telegram, &type) ? command_type_to_event_type(type) : "unknown";
+      this->trigger(key, telegram.substr(9, 3), telegram.substr(16, 9), telegram.substr(26, 9), description);
+    });
+  }
 };
 
 }  // namespace warema_cover_hub

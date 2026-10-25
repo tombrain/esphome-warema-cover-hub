@@ -29,6 +29,10 @@ warema_cover_hub:
   id: warema_hub
   transmitter_id: rf_transmitter
   receiver_id: rf_receiver
+  on_unassigned:
+    - logger.log:
+        format: "Unassigned %s on channel %s: %s"
+        args: ["key.c_str()", "command.c_str()", "description.c_str()"]
   number_of_transmissions: 3
 
 cover:

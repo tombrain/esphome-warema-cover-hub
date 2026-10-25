@@ -10,6 +10,7 @@ static const char *const TAG = "warema_cover_hub.event";
 void RemoteEvent::setup() {
   if (this->cover_ != nullptr)
     this->address_ = this->cover_->address_telegram();
+  this->parent_->register_channel(this->address_);
 
   this->parent_->add_on_telegram_callback([this](const std::string &telegram, const std::string & /*description*/) {
     if (!same_receiver(telegram, this->address_))
