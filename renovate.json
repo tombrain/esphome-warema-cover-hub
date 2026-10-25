@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "schedule:monthly"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "pip pins in workflow run steps",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["(?<depName>ruff|clang-format)==(?<currentValue>[^\\s]+)"],
+      "datasourceTemplate": "pypi"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Keep in sync with ESPHome's .pre-commit-config.yaml, so only update on approval",
+      "matchDatasources": ["pypi"],
+      "matchPackageNames": ["ruff", "clang-format"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
