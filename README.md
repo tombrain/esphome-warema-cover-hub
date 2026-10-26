@@ -40,11 +40,11 @@ drifts when a blind is moved with the original remote.
 
 ```yaml
 external_components:
-  - source: github://tombrain/esphome-warema-cover-hub@v1.3.0
+  - source: github://tombrain/esphome-warema-cover-hub@v1.3.1
     components: [warema_cover_hub]
 ```
 
-Pin a release tag (`@v1.3.0`). Without it, ESPHome follows the `main` branch.
+Pin a release tag (`@v1.3.1`). Without it, ESPHome follows the `main` branch.
 
 ## Configuration
 
