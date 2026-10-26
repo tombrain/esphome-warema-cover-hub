@@ -12,10 +12,18 @@ namespace warema_cover_hub {
 static const char *const TAG = "warema_cover_hub";
 
 static const uint32_t TRANSMIT_GAP_MS = 10;
+// 100 ms, in centiseconds like Component::warn_if_blocking_over_
+static const uint8_t BLOCKING_WARN_THRESHOLD_CS = 10;
 // Receptions this long after our own transmission are its echo and ignored
 static const uint32_t RECEIVE_HOLDOFF_MS = 100;
 // The remote repeats each telegram, report repetitions within this window only once
 static const uint32_t DUPLICATE_WINDOW_MS = 1000;
+
+void WaremaCoverHub::setup() {
+  // On the ESP8266 the transmitter blocks for the whole telegram (~77 ms). That is expected,
+  // so only warn about blocking beyond it.
+  this->warn_if_blocking_over_ = BLOCKING_WARN_THRESHOLD_CS;
+}
 
 void WaremaCoverHub::dump_config() {
   ESP_LOGCONFIG(TAG, "Warema Cover Hub:");

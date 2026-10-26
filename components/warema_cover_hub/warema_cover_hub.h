@@ -26,6 +26,7 @@ class WaremaCover;
 /// Received telegrams (e.g. from the original remote) are logged with their codes.
 class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListener {
  public:
+  void setup() override;
   void loop() override;
   void dump_config() override;
   bool on_receive(remote_base::RemoteReceiveData data) override;

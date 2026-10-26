@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   follow the remote, e.g. `'Living room' stopping at 65%`. ESPHome itself logs positions only
   at verbose level.
 
+### Fixed
+
+- No "took a long time for an operation" warning when sending on the ESP8266, where sending
+  a telegram blocks for about 77 ms. The hub warns only above 100 ms.
+
 ## [1.3.0] - 2026-10-25
 
 ### Added
