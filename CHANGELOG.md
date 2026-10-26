@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Covers log their position at debug level when they start, stop, reach an end position or
+  follow the remote, e.g. `'Living room' stopping at 65%`. ESPHome itself logs positions only
+  at verbose level.
+
 ## [1.3.0] - 2026-10-25
 
 ### Added

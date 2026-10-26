@@ -63,6 +63,7 @@ void WaremaCover::loop() {
     if (this->has_built_in_endstop_ &&
         (this->target_position_ == COVER_OPEN || this->target_position_ == COVER_CLOSED)) {
       // Don't send STOP, the cover stops by itself.
+      ESP_LOGD(TAG, "'%s' reached %.0f%% (end position)", this->get_name().c_str(), this->position * 100.0f);
       this->current_operation = COVER_OPERATION_IDLE;
     } else {
       this->start_direction_(COVER_OPERATION_IDLE);
@@ -155,15 +156,17 @@ void WaremaCover::start_direction_(CoverOperation dir) {
   this->recompute_position_();
   switch (dir) {
     case COVER_OPERATION_IDLE:
-      ESP_LOGD(TAG, "'%s' stopping", this->get_name().c_str());
+      ESP_LOGD(TAG, "'%s' stopping at %.0f%%", this->get_name().c_str(), this->position * 100.0f);
       this->parent_->send_command(this->build_telegram_(CommandType::STOP));
       break;
     case COVER_OPERATION_OPENING:
-      ESP_LOGD(TAG, "'%s' opening", this->get_name().c_str());
+      ESP_LOGD(TAG, "'%s' opening from %.0f%% to %.0f%%", this->get_name().c_str(), this->position * 100.0f,
+               this->target_position_ * 100.0f);
       this->parent_->send_command(this->build_telegram_(CommandType::OPEN));
       break;
     case COVER_OPERATION_CLOSING:
-      ESP_LOGD(TAG, "'%s' closing", this->get_name().c_str());
+      ESP_LOGD(TAG, "'%s' closing from %.0f%% to %.0f%%", this->get_name().c_str(), this->position * 100.0f,
+               this->target_position_ * 100.0f);
       this->parent_->send_command(this->build_telegram_(CommandType::CLOSE));
       break;
     default:
@@ -214,8 +217,9 @@ void WaremaCover::follow_command(CommandType type) {
   if (next == this->current_operation)
     return;
 
-  ESP_LOGD(TAG, "'%s' follows %s from elsewhere", this->get_name().c_str(), command_type_to_str(type));
   this->recompute_position_();
+  ESP_LOGD(TAG, "'%s' follows %s from elsewhere at %.0f%%", this->get_name().c_str(), command_type_to_str(type),
+           this->position * 100.0f);
   if (next != COVER_OPERATION_IDLE) {
     this->target_position_ = next == COVER_OPERATION_OPENING ? COVER_OPEN : COVER_CLOSED;
     this->last_operation_ = next;
