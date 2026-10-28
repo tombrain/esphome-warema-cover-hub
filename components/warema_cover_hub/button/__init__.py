@@ -40,9 +40,7 @@ def _final_validate(config):
     full_config = fv.full_config.get()
     cover_path = full_config.get_path_for_id(config[CONF_COVER_ID])[:-1]
     cover_config = full_config.get_config_for_path(cover_path)
-    hub_path = full_config.get_path_for_id(cover_config[CONF_WAREMA_COVER_HUB_ID])[
-        :-1
-    ]
+    hub_path = full_config.get_path_for_id(cover_config[CONF_WAREMA_COVER_HUB_ID])[:-1]
     hub_config = full_config.get_config_for_path(hub_path)
     if CONF_TRANSMITTER_ID not in hub_config:
         raise cv.Invalid(f"This button requires '{CONF_TRANSMITTER_ID}' on the hub")
