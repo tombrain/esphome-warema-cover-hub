@@ -74,6 +74,7 @@ static void test_real_keys() {
       {"S01110100101001S001101001S110010110S", CommandType::FUNCTION_A},
       {"S01110100101000S001101001S110010110S", CommandType::FUNCTION_B},
       {"S01110100101101S001101001S110010110S", CommandType::FUNCTION_C},
+      {"S01110100101100S001101001S110010110S", CommandType::LEARN},
   };
   for (const auto &key : keys) {
     CommandType type;
@@ -82,6 +83,7 @@ static void test_real_keys() {
   }
   CHECK(std::string(command_type_to_event_type(CommandType::OPEN)) == "open");
   CHECK(std::string(command_type_to_event_type(CommandType::FUNCTION_C)) == "function_c");
+  CHECK(std::string(command_type_to_event_type(CommandType::LEARN)) == "learn");
   CHECK(describe_telegram(keys[3].telegram) ==
         "FUNCTION_A, command: 101, devicecode1: 001101001, devicecode2: 110010110");
 }

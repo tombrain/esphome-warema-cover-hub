@@ -207,7 +207,8 @@ event:
 | `warema_cover_hub_id` | nein | ID des Hubs. Nur nötig, wenn du mehr als einen Hub konfigurierst. |
 
 Dazu kommen die [Basis-Optionen für Events](https://esphome.io/components/event/#base-event-configuration).
-Die Ereignistypen sind `open`, `close`, `stop`, `function_a`, `function_b` und `function_c`.
+Die Ereignistypen sind `open`, `close`, `stop`, `function_a`, `function_b`, `function_c` und
+`learn` (die Lerntaste L).
 Eine Automation in Home Assistant, die auf Taste A reagiert:
 
 ```yaml
@@ -283,14 +284,14 @@ logger:
 ```
 
 Neben `OPEN`, `CLOSE` und `STOP` werden die Funktionstasten A, B und C der Fernbedienung als
-`FUNCTION_A` bis `FUNCTION_C` angezeigt. `UNKNOWN` steht für eine Taste, die diese Komponente
+`FUNCTION_A` bis `FUNCTION_C` angezeigt, die Lerntaste L als `LEARN`. `UNKNOWN` steht für eine Taste, die diese Komponente
 noch nicht kennt. Eröffne dann bitte ein Issue mit dem Telegramm aus dem Debug-Log.
 
 ### Auf nicht zugeordnete Codes reagieren
 
 `on_unassigned` am Hub läuft bei jedem Tastendruck auf einem Kanal, der weder ein Cover noch ein
 Event hat, z. B. bei einer neuen Fernbedienung. Zur Verfügung stehen die Texte `key` (`open`,
-`close`, `stop`, `function_a` bis `function_c` oder `unknown`), `command`, `devicecode1`,
+`close`, `stop`, `function_a` bis `function_c`, `learn` oder `unknown`), `command`, `devicecode1`,
 `devicecode2` und `description`. Zum Beispiel für eine Benachrichtigung in Home Assistant:
 
 ```yaml

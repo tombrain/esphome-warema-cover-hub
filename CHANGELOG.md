@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The learn key L of the remote is recognized: received telegrams show `LEARN` instead of
+  `UNKNOWN`, events fire `learn` and `on_unassigned` passes `learn` as key. L sends the
+  command bits of OPEN with the suffix `100`.
+
 ## [1.4.0] - 2026-10-28
 
 ### Added

@@ -203,7 +203,8 @@ event:
 | `warema_cover_hub_id` | no | ID of the hub. Needed only if you configure more than one hub. |
 
 Plus the base [event options](https://esphome.io/components/event/#base-event-configuration).
-The event types are `open`, `close`, `stop`, `function_a`, `function_b` and `function_c`.
+The event types are `open`, `close`, `stop`, `function_a`, `function_b`, `function_c` and
+`learn` (the learn key L).
 An automation in Home Assistant reacting to key A:
 
 ```yaml
@@ -275,14 +276,14 @@ logger:
 ```
 
 Besides `OPEN`, `CLOSE` and `STOP`, the function keys A, B and C of the remote are shown as
-`FUNCTION_A` to `FUNCTION_C`. `UNKNOWN` means a key this component does not know yet. Please
+`FUNCTION_A` to `FUNCTION_C` and the learn key L as `LEARN`. `UNKNOWN` means a key this component does not know yet. Please
 open an issue with the telegram from the debug log.
 
 ### Reacting to unassigned codes
 
 `on_unassigned` on the hub runs for each key pressed on a channel that has no cover and no
 event, e.g. a new remote. It provides the strings `key` (`open`, `close`, `stop`,
-`function_a` to `function_c` or `unknown`), `command`, `devicecode1`, `devicecode2` and
+`function_a` to `function_c`, `learn` or `unknown`), `command`, `devicecode1`, `devicecode2` and
 `description`. For example, to get a notification in Home Assistant:
 
 ```yaml

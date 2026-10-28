@@ -18,7 +18,7 @@ static const char SYNC = 'S';
 static const char *const OPEN_COMMAND_BITS = "01110100";
 static const char *const CLOSE_COMMAND_BITS = "01110100";  // identical to OPEN, direction is in the suffix
 static const char *const STOP_COMMAND_BITS = "00110100";
-// The function keys A, B and C of the remote use the command bits of OPEN/CLOSE
+// The function keys A, B and C and the learn key L of the remote use the command bits of OPEN/CLOSE
 static const char *const FUNCTION_COMMAND_BITS = "01110100";
 static const char *const OPEN_SUFFIX = "111";
 static const char *const CLOSE_SUFFIX = "110";
@@ -26,8 +26,9 @@ static const char *const STOP_SUFFIX = "001";
 static const char *const FUNCTION_A_SUFFIX = "001";
 static const char *const FUNCTION_B_SUFFIX = "000";
 static const char *const FUNCTION_C_SUFFIX = "101";
+static const char *const LEARN_SUFFIX = "100";
 
-enum class CommandType { OPEN, CLOSE, STOP, FUNCTION_A, FUNCTION_B, FUNCTION_C };
+enum class CommandType { OPEN, CLOSE, STOP, FUNCTION_A, FUNCTION_B, FUNCTION_C, LEARN };
 
 const char *command_type_to_str(CommandType type);
 /// Event type for Home Assistant, e.g. "open" or "function_a".

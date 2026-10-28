@@ -25,6 +25,8 @@ const char *command_type_to_str(CommandType type) {
       return "FUNCTION_B";
     case CommandType::FUNCTION_C:
       return "FUNCTION_C";
+    case CommandType::LEARN:
+      return "LEARN";
     default:
       return "UNKNOWN";
   }
@@ -44,6 +46,8 @@ const char *command_type_to_event_type(CommandType type) {
       return "function_b";
     case CommandType::FUNCTION_C:
       return "function_c";
+    case CommandType::LEARN:
+      return "learn";
     default:
       return "unknown";
   }
@@ -74,6 +78,9 @@ std::string build_telegram(CommandType type, const std::string &command, const s
     case CommandType::FUNCTION_C:
       telegram.append(FUNCTION_COMMAND_BITS).append(command).append(FUNCTION_C_SUFFIX);
       break;
+    case CommandType::LEARN:
+      telegram.append(FUNCTION_COMMAND_BITS).append(command).append(LEARN_SUFFIX);
+      break;
   }
 
   telegram.push_back(SYNC);
@@ -99,6 +106,8 @@ bool parse_command_type(const std::string &telegram, CommandType *type) {
     *type = CommandType::FUNCTION_B;
   } else if (bits == FUNCTION_COMMAND_BITS && suffix == FUNCTION_C_SUFFIX) {
     *type = CommandType::FUNCTION_C;
+  } else if (bits == FUNCTION_COMMAND_BITS && suffix == LEARN_SUFFIX) {
+    *type = CommandType::LEARN;
   } else {
     return false;
   }

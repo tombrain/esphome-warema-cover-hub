@@ -20,7 +20,15 @@ from ..cover import (
 
 CONF_COVER_ID = "cover_id"
 
-EVENT_TYPES = ["open", "close", "stop", "function_a", "function_b", "function_c"]
+EVENT_TYPES = [
+    "open",
+    "close",
+    "stop",
+    "function_a",
+    "function_b",
+    "function_c",
+    "learn",
+]
 
 RemoteEvent = warema_cover_hub_ns.class_(
     "RemoteEvent",
