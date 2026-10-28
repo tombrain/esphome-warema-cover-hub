@@ -13,7 +13,10 @@ void RemoteEvent::setup() {
   this->parent_->register_channel(this->address_);
 
   this->parent_->add_on_telegram_callback([this](const std::string &telegram, const std::string & /*description*/) {
-    if (!same_receiver(telegram, this->address_))
+    // A cover also matches its additional remotes
+    const bool addressed = this->cover_ != nullptr ? this->cover_->is_addressed_by(telegram)
+                                                   : same_receiver(telegram, this->address_);
+    if (!addressed)
       return;
     CommandType type;
     if (parse_command_type(telegram, &type))

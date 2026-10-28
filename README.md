@@ -100,6 +100,7 @@ pending repetitions, so a STOP is never followed by a leftover OPEN.
 | `reverse_delay` | no | Pause before reversing a moving cover, default `1s`. See below. |
 | `follow_remote` | no | Track keys pressed on the original remote, default `true`. See below. |
 | `members` | no | IDs of the covers this channel moves too, e.g. for an "all" channel. See below. |
+| `additional_remotes` | no | Codes (`command`, `devicecode1`, `devicecode2`) of further remotes programmed to this blind. See below. |
 
 Plus all [base cover options](https://esphome.io/components/cover/#base-cover-configuration).
 
@@ -135,6 +136,26 @@ cover:
     command: "011"
     # ...
     members: [living_1, living_2]
+```
+
+If several remotes are programmed to a blind, the cover sends with its own codes only, but
+list the codes of the other remotes under `additional_remotes`. Then their keys count for the
+cover as well: it follows them, the log and the text sensor show the cover's name, events with
+`cover_id` fire, and `on_unassigned` no longer runs for them. For a group channel on another
+remote, add its codes to the group cover.
+
+```yaml
+cover:
+  - platform: warema_cover_hub
+    name: "Living room 1"
+    command: "011"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
+    # ...
+    additional_remotes:
+      - command: "001"
+        devicecode1: "110011001"
+        devicecode2: "110011010"
 ```
 
 ### Switch: `platform: warema_cover_hub`
@@ -177,7 +198,7 @@ event:
 
 | Option | Required | Description |
 |---|---|---|
-| `cover_id` | one of | ID of a cover whose channel is meant. |
+| `cover_id` | one of | ID of a cover whose channel is meant, including its `additional_remotes`. |
 | `command`, `devicecode1`, `devicecode2` | one of | The codes of the channel, as for a cover. |
 | `warema_cover_hub_id` | no | ID of the hub. Needed only if you configure more than one hub. |
 

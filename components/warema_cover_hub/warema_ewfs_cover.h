@@ -29,12 +29,17 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   void set_follow_remote(bool follow_remote) { this->follow_remote_ = follow_remote; }
   /// Makes this cover a group channel that also moves the member.
   void add_member(WaremaCover *member) { this->members_.push_back(member); }
+  /// Another remote programmed to this receiver. Only used for receiving, sending uses the own codes.
+  void add_additional_remote(const std::string &command, const std::string &devicecode1,
+                             const std::string &devicecode2) {
+    this->additional_addresses_.push_back(build_telegram(CommandType::STOP, command, devicecode1, devicecode2));
+  }
 
   cover::CoverTraits get_traits() override;
 
-  /// True if the telegram is meant for this cover (same command and device codes).
-  bool is_addressed_by(const std::string &telegram) const { return same_receiver(telegram, this->address_telegram()); }
-  /// Any telegram with this cover's command and device codes, for comparing receivers.
+  /// True if the telegram is meant for this cover (codes of this cover or of an additional remote).
+  bool is_addressed_by(const std::string &telegram) const;
+  /// Any telegram with this cover's own command and device codes, for comparing receivers.
   std::string address_telegram() const { return this->build_telegram_(CommandType::STOP); }
 
   /// Tracks a command the motor received from elsewhere (e.g. the original remote) without
@@ -71,6 +76,7 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
 
   bool follow_remote_{true};
   std::vector<WaremaCover *> members_{};
+  std::vector<std::string> additional_addresses_{};
 
   std::string command_;
   std::string devicecode1_;

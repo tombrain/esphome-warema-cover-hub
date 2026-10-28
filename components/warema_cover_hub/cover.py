@@ -14,6 +14,7 @@ CONF_COMMAND = "command"
 CONF_REVERSE_DELAY = "reverse_delay"
 CONF_FOLLOW_REMOTE = "follow_remote"
 CONF_MEMBERS = "members"
+CONF_ADDITIONAL_REMOTES = "additional_remotes"
 
 WaremaCover = warema_cover_hub_ns.class_(
     "WaremaCover",
@@ -42,6 +43,15 @@ def validate_binary_string(length):
     return validator
 
 
+REMOTE_SCHEMA = cv.Schema(
+    {
+        cv.Required(CONF_DEVICECODE1): validate_binary_string(9),
+        cv.Required(CONF_DEVICECODE2): validate_binary_string(9),
+        cv.Required(CONF_COMMAND): validate_binary_string(3),
+    }
+)
+
+
 CONFIG_SCHEMA = (
     cover.cover_schema(WaremaCover)
     .extend(
@@ -57,6 +67,7 @@ CONFIG_SCHEMA = (
             ): cv.positive_time_period_milliseconds,
             cv.Optional(CONF_FOLLOW_REMOTE, default=True): cv.boolean,
             cv.Optional(CONF_MEMBERS): cv.ensure_list(cv.use_id(WaremaCover)),
+            cv.Optional(CONF_ADDITIONAL_REMOTES): cv.ensure_list(REMOTE_SCHEMA),
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -97,6 +108,12 @@ async def to_code(config):
     cg.add(var.set_command(config[CONF_COMMAND]))
     cg.add(var.set_reverse_delay(config[CONF_REVERSE_DELAY]))
     cg.add(var.set_follow_remote(config[CONF_FOLLOW_REMOTE]))
+    for remote in config.get(CONF_ADDITIONAL_REMOTES, []):
+        cg.add(
+            var.add_additional_remote(
+                remote[CONF_COMMAND], remote[CONF_DEVICECODE1], remote[CONF_DEVICECODE2]
+            )
+        )
     for member_id in config.get(CONF_MEMBERS, []):
         member = await cg.get_variable(member_id)
         cg.add(var.add_member(member))

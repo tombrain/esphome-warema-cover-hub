@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Cover option `additional_remotes` for further remotes programmed to the same blind. Their
+  keys count for the cover: it follows them, the log and the text sensor show its name,
+  events with `cover_id` fire, and `on_unassigned` no longer runs for them. Sending still uses
+  the cover's own codes only.
+
 ## [1.3.1] - 2026-10-26
 
 ### Changed

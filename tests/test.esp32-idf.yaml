@@ -52,6 +52,10 @@ cover:
     command: "110"
     devicecode1: "101010010"
     devicecode2: "101010011"
+    additional_remotes:
+      - command: "001"
+        devicecode1: "110011001"
+        devicecode2: "110011010"
     open_duration: 16s
     close_duration: 18s
 

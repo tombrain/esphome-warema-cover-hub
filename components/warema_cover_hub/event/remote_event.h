@@ -14,7 +14,8 @@ namespace warema_cover_hub {
 
 /// Fires an event for each key pressed on a remote channel, e.g. "open" or "function_a".
 ///
-/// The channel is given by a cover or by its command and device codes. Own transmissions
+/// The channel is given by a cover (including its additional remotes) or by its command and
+/// device codes. Own transmissions
 /// are filtered out by the hub, so only keys of a real remote are reported.
 class RemoteEvent : public event::Event, public Component, public Parented<WaremaCoverHub> {
  public:

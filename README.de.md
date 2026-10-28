@@ -102,6 +102,7 @@ OPEN.
 | `reverse_delay` | nein | Pause vor dem Umkehren eines fahrenden Covers, Standard `1s`. Siehe unten. |
 | `follow_remote` | nein | Tastendrücke der Original-Fernbedienung nachverfolgen, Standard `true`. Siehe unten. |
 | `members` | nein | IDs der Covers, die dieser Kanal mitbewegt, z. B. bei einem Kanal „alle“. Siehe unten. |
+| `additional_remotes` | nein | Codes (`command`, `devicecode1`, `devicecode2`) weiterer Fernbedienungen, die auf diesen Rollladen eingelernt sind. Siehe unten. |
 
 Dazu kommen alle [Basis-Optionen für Covers](https://esphome.io/components/cover/#base-cover-configuration).
 
@@ -138,6 +139,26 @@ cover:
     command: "011"
     # ...
     members: [wohnzimmer_1, wohnzimmer_2]
+```
+
+Sind mehrere Fernbedienungen auf einen Rollladen eingelernt, sendet das Cover nur mit seinen
+eigenen Codes. Die Codes der anderen Fernbedienungen trägst du unter `additional_remotes` ein.
+Dann zählen auch ihre Tasten für das Cover: Es folgt ihnen, Log und Textsensor zeigen den Namen des
+Covers, Events mit `cover_id` lösen aus und `on_unassigned` läuft für sie nicht mehr. Für einen
+Gruppenkanal auf einer anderen Fernbedienung trägst du dessen Codes beim Gruppen-Cover ein.
+
+```yaml
+cover:
+  - platform: warema_cover_hub
+    name: "Wohnzimmer 1"
+    command: "011"
+    devicecode1: "101010010"
+    devicecode2: "101010011"
+    # ...
+    additional_remotes:
+      - command: "001"
+        devicecode1: "110011001"
+        devicecode2: "110011010"
 ```
 
 ### Schalter: `platform: warema_cover_hub`
@@ -181,7 +202,7 @@ event:
 
 | Option | Pflicht | Beschreibung |
 |---|---|---|
-| `cover_id` | eins von beiden | ID eines Covers, dessen Kanal gemeint ist. |
+| `cover_id` | eins von beiden | ID eines Covers, dessen Kanal gemeint ist, einschließlich seiner `additional_remotes`. |
 | `command`, `devicecode1`, `devicecode2` | eins von beiden | Die Codes des Kanals, wie beim Cover. |
 | `warema_cover_hub_id` | nein | ID des Hubs. Nur nötig, wenn du mehr als einen Hub konfigurierst. |
 

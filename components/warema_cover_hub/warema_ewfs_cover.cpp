@@ -14,6 +14,16 @@ std::string WaremaCover::build_telegram_(CommandType type) const {
   return build_telegram(type, this->command_, this->devicecode1_, this->devicecode2_);
 }
 
+bool WaremaCover::is_addressed_by(const std::string &telegram) const {
+  if (same_receiver(telegram, this->address_telegram()))
+    return true;
+  for (const auto &address : this->additional_addresses_) {
+    if (same_receiver(telegram, address))
+      return true;
+  }
+  return false;
+}
+
 void WaremaCover::dump_config() {
   LOG_COVER("", "Warema EWFS Cover", this);
   ESP_LOGCONFIG(TAG, "  Open Duration: %.1fs", this->open_duration_ / 1e3f);
@@ -28,6 +38,10 @@ void WaremaCover::dump_config() {
   ESP_LOGCONFIG(TAG, "  Telegram OPEN:  %s", this->build_telegram_(CommandType::OPEN).c_str());
   ESP_LOGCONFIG(TAG, "  Telegram CLOSE: %s", this->build_telegram_(CommandType::CLOSE).c_str());
   ESP_LOGCONFIG(TAG, "  Telegram STOP:  %s", this->build_telegram_(CommandType::STOP).c_str());
+  for (const auto &address : this->additional_addresses_) {
+    ESP_LOGCONFIG(TAG, "  Additional remote: command %s, devicecode1 %s, devicecode2 %s", address.substr(9, 3).c_str(),
+                  address.substr(16, 9).c_str(), address.substr(26, 9).c_str());
+  }
 }
 
 void WaremaCover::setup() {
