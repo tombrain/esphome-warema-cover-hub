@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- README: teaching a further Warema remote with the hub in place of the main remote, step by
+  step, including reading the code of the new remote for `additional_remotes`.
+
 ## [1.5.1] - 2026-10-28
 
 ### Fixed

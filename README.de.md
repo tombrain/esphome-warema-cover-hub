@@ -220,18 +220,33 @@ Der Lernmodus dauert etwa eine Minute und wird auf einem von zwei Wegen geöffne
 - **Hauptkanal:** An der Fernbedienung mit dem Hauptkanal L halten, bis der Rollladen winkt.
   Das ist für weitere Fernbedienungen; HOCH oder TIEF am Hauptkanal beendet den Lernmodus.
 
-Der Button lässt sich auf drei Arten einsetzen. Getestet ist bisher nur die erste, die anderen
-folgen demselben Warema-Ablauf.
+Für eine weitere Fernbedienung den Strom nicht unterbrechen: Das öffnet den Lernmodus für einen
+neuen Hauptkanal. Die Hauptfernbedienung bleibt Hauptkanal, weitere Fernbedienungen werden
+zusätzlich gespeichert.
 
-**Statt der Hauptfernbedienung (getestet).** Mit den Codes der Hauptfernbedienung, so wie ein
-Cover normalerweise konfiguriert ist, öffnet der Button den Lernmodus wie L an dieser
-Fernbedienung, z. B. um eine weitere Fernbedienung einzulernen, ohne die Hauptfernbedienung zur
-Hand zu haben:
+Der Button lässt sich auf drei Arten einsetzen. Getestet ist das Öffnen des Lernmodus mit den
+Codes der Hauptfernbedienung, der Rest folgt demselben Warema-Ablauf.
 
-1. Den Lern-Button drücken. Sobald der Rollladen winkt, den Button erneut drücken.
-2. An der neuen Fernbedienung L halten, bis der Rollladen winkt.
-3. Das Cover aus Home Assistant fahren, hoch oder runter. Das sendet HOCH oder TIEF des
-   Hauptkanals und beendet den Lernmodus.
+**Weitere Warema-Fernbedienung einlernen.** Ein Cover ist normalerweise mit den Codes der
+Hauptfernbedienung seines Rollladens konfiguriert. Dann übernimmt der Hub die Rolle der
+Hauptfernbedienung und liest nebenbei den Code der neuen Fernbedienung aus:
+
+1. Den Lern-Button des Covers drücken. Der Hub sendet L der Hauptfernbedienung. Sobald der
+   Rollladen winkt, den Button erneut drücken, damit der Hub aufhört zu senden: Während er
+   sendet, empfängt er nicht. L an der Hauptfernbedienung etwa 5 Sekunden halten bewirkt
+   dasselbe.
+2. An der neuen Fernbedienung den Kanal des Rollladens wählen und L halten, bis der Rollladen
+   winkt, etwa 5 Sekunden. Der Hub empfängt dieses L und schreibt es mit dem Code der neuen
+   Fernbedienung ins Log, z. B. `Received LEARN, command: 010, devicecode1: 000011010,
+   devicecode2: 011110101 (no cover configured)`. Der Textsensor zeigt es ebenfalls an, und
+   `on_unassigned` läuft mit der Taste `learn`.
+3. Das Cover aus Home Assistant fahren, hoch oder runter. Das sendet HOCH oder TIEF der
+   Hauptfernbedienung und beendet den Lernmodus. Der Rollladen fährt wieder normal.
+4. Den Code aus Schritt 2 beim Cover unter `additional_remotes` eintragen, damit das Cover auch
+   der neuen Fernbedienung folgt.
+
+Winkt der Rollladen in Schritt 1 oder 2 nicht, etwa eine Minute warten, bis der Lernmodus
+beendet ist, und neu beginnen.
 
 **Hub als weitere Fernbedienung.** Das Cover bekommt einen eigenen Code, damit hängt der Hub
 nicht mehr an den Codes einer Fernbedienung. Die Original-Fernbedienung kommt unter

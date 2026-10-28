@@ -216,17 +216,30 @@ in one of two ways:
 - **Main channel:** hold L on the remote with the main channel until the blind waves. This is
   for further remotes; pressing UP or DOWN on the main channel ends learn mode.
 
-The button can be used in three ways. Only the first one has been tested so far; the others
-follow the same Warema procedure.
+Do not switch off the power to teach a further remote: that opens learn mode for a new main
+channel. The main remote stays the main channel, further remotes are stored next to it.
 
-**Instead of the main remote (tested).** With the codes of the main remote, which is how a
-cover is usually configured, the button opens learn mode like L on that remote, e.g. to
-teach a further remote without having the main remote at hand:
+The button can be used in three ways. Opening learn mode with the codes of the main remote
+has been tested; the rest follows the same Warema procedure.
 
-1. Press the learn button. When the blind waves, press it again.
-2. Hold L on the new remote until the blind waves.
-3. Move the cover from Home Assistant, up or down. This sends UP or DOWN of the main channel
-   and ends learn mode.
+**Teaching a further Warema remote.** A cover is usually configured with the codes of the
+main remote of its blind. Then the hub takes over the part of the main remote, and it reads
+the code of the new remote on the way:
+
+1. Press the learn button of the cover. The hub sends L of the main remote. When the blind
+   waves, press the button again, so the hub stops sending: while it sends, it does not
+   receive. Holding L on the main remote for about 5 seconds does the same.
+2. On the new remote, select the channel of the blind and hold L until the blind waves,
+   about 5 seconds. The hub receives this L and logs it with the code of the new remote, e.g.
+   `Received LEARN, command: 010, devicecode1: 000011010, devicecode2: 011110101 (no cover
+   configured)`. The text sensor shows it too, and `on_unassigned` runs with the key `learn`.
+3. Move the cover from Home Assistant, up or down. This sends UP or DOWN of the main remote
+   and ends learn mode. The blind moves normally again.
+4. Add the code from step 2 to the cover under `additional_remotes`, so the cover follows the
+   new remote as well.
+
+If the blind does not wave in step 1 or 2, wait about a minute until learn mode has ended and
+start again.
 
 **Hub as a further remote.** The cover gets an own code, so the hub no longer depends on the
 codes of a remote. The original remote goes under `additional_remotes`, so the cover still
