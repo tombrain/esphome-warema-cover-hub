@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-10-28
+
 ### Changed
 
 - README: teaching a further Warema remote with the hub in place of the main remote, step by
@@ -149,7 +151,8 @@ First release as an ESPHome external component.
 
 First tagged version, before the restructuring.
 
-[Unreleased]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/tombrain/esphome-warema-cover-hub/compare/v1.3.1...v1.4.0
