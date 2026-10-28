@@ -12,6 +12,7 @@ With a [`remote_receiver`](https://esphome.io/components/remote_receiver.html), 
 decodes the telegrams of the original remote, so you can read the codes of your blinds.
 The cover position is estimated from the open and close durations, like ESPHome's
 [`time_based`](https://esphome.io/components/cover/time_based.html) cover.
+A learn button sends the learn key L of a remote, so remotes can be taught from the ESP.
 
 Works with ESP32 and ESP8266, on both the Arduino and the ESP-IDF framework.
 
@@ -177,28 +178,15 @@ Both take `warema_cover_hub_id` (needed only with more than one hub) and the bas
 
 ### Button: `platform: warema_cover_hub`
 
-Teaches the hub to a blind as a further remote, so the original remote keeps working. The
-button `learn` sends the learn key L with the codes of a cover for `duration`, like holding L
-on a remote. Press it again to stop sending early. Requires `transmitter_id` on the hub.
+The button `learn` sends the learn key L with the codes of a cover for `duration`, like
+holding L on that remote. Press it again to stop sending early. Requires `transmitter_id` on
+the hub.
 
 The button is internal by default: Home Assistant does not get it, it is only on the web
 server of the ESP, which needs `include_internal: true` for it. Set `internal: false` to have
 it in Home Assistant too.
 
 ```yaml
-cover:
-  - platform: warema_cover_hub
-    id: bathroom
-    name: "Bathroom"
-    command: "111"                 # own code of the hub, e.g. the random one from the log
-    devicecode1: "010110010"
-    devicecode2: "001101011"
-    # ...
-    additional_remotes:            # the original remote, so the cover still follows it
-      - command: "111"
-        devicecode1: "000101111"
-        devicecode2: "010011010"
-
 button:
   - platform: warema_cover_hub
     cover_id: bathroom
@@ -211,24 +199,77 @@ web_server:
 
 | Option | Required | Description |
 |---|---|---|
-| `cover_id` | yes | ID of the cover whose codes are taught. |
+| `cover_id` | yes | ID of the cover whose codes are sent. |
 | `learn` | yes | The learn button, with the base [button options](https://esphome.io/components/button/#base-button-configuration) and: |
 | `learn` > `duration` | no | How long L is sent, default `5s`, 1s to 20s. L on a remote has to be held about 3 seconds. |
 | `learn` > `internal` | no | Default `true`, so the button is not in Home Assistant. |
 
-Pick a code no remote uses. The hub logs a random one at startup (`Random code for a new
-remote`), with the device codes starting with 0 like those of all remotes seen so far.
+#### Learn mode of Warema EWFS receivers
 
-Teaching it, as for any further remote of a Warema EWFS receiver:
+A receiver stores one main channel, the remote taught first, and up to 15 further remotes. It
+acknowledges each L it accepts by waving once. Learn mode lasts about a minute and is opened
+in one of two ways:
 
-1. On the remote with the main channel of the blind, i.e. the one taught first, hold L until
-   the blind waves once. The receiver is now in learn mode for about a minute.
-2. Press the button. When the blind waves once, press it again to stop.
-3. On the remote with the main channel, press UP or DOWN. This ends learn mode.
+- **Power-up:** switch off the power of the receiver and on again after about 5 seconds. This
+  is for the main channel. All receivers on the same circuit are in learn mode then, and all
+  of them learn the next L they receive.
+- **Main channel:** hold L on the remote with the main channel until the blind waves. This is
+  for further remotes; pressing UP or DOWN on the main channel ends learn mode.
+
+The button can be used in three ways. Only the first one has been tested so far; the others
+follow the same Warema procedure.
+
+**Instead of the main remote (tested).** With the codes of the main remote, which is how a
+cover is usually configured, the button opens learn mode like L on that remote, e.g. to
+teach a further remote without having the main remote at hand:
+
+1. Press the learn button. When the blind waves, press it again.
+2. Hold L on the new remote until the blind waves.
+3. Move the cover from Home Assistant, up or down. This sends UP or DOWN of the main channel
+   and ends learn mode.
+
+**Hub as a further remote.** The cover gets an own code, so the hub no longer depends on the
+codes of a remote. The original remote goes under `additional_remotes`, so the cover still
+follows it. Pick a code no remote uses; the hub logs a random one at startup (`Random code
+for a new remote`), with the device codes starting with 0 like those of all remotes seen so
+far. Until it is taught, the blind does not react to the cover.
+
+```yaml
+cover:
+  - platform: warema_cover_hub
+    id: bathroom
+    name: "Bathroom"
+    command: "111"                 # own code of the hub
+    devicecode1: "010110010"
+    devicecode2: "001101011"
+    # ...
+    additional_remotes:            # the original remote
+      - command: "111"
+        devicecode1: "000101111"
+        devicecode2: "010011010"
+```
+
+1. Hold L on the remote with the main channel until the blind waves.
+2. Press the learn button. When the blind waves, press it again.
+3. Press UP or DOWN on the remote with the main channel. This ends learn mode.
 4. Move the cover from Home Assistant to check it.
 
-Do not switch off the power of the blind for this: learn mode after power-up is for the main
-channel. A receiver stores one main channel and up to 15 further remotes.
+**Hub as main channel.** With an own code as above, the hub can also become the main channel
+after a power-up. It then opens learn mode itself, so further remotes can be taught from the
+ESP as in the first case.
+
+1. Switch off the power of the receiver and on again after about 5 seconds.
+2. Press the learn button. When the blind waves, press it again. Learn mode ends by itself.
+
+Before doing this, keep in mind:
+
+- The receiver has only one main channel, so the hub replaces the main remote. Whether
+  further remotes stay stored is not documented by Warema; teach them again if they stop
+  working.
+- Only do this if the receiver can be switched off on its own. Otherwise all receivers on
+  the circuit learn the hub's code as their main channel.
+- Keep the codes in your configuration safe. Without them, the main channel can only be
+  replaced by another power-up.
 
 ### Event: `platform: warema_cover_hub`
 
@@ -375,7 +416,19 @@ actions" of the device in the ESPHome integration.
 A telegram has the layout
 `S <command bits:8> <command:3> <suffix:3> S <devicecode1:9> S <devicecode2:9> S`.
 `S` is a 5000 µs high sync, each bit lasts 1780 µs: `0` is high then low, `1` is low then
-high (Manchester code). The command bits and the suffix select OPEN, CLOSE or STOP.
+high (Manchester code). The command bits and the suffix select the key:
+
+| Key | Command bits | Suffix |
+|---|---|---|
+| OPEN (UP) | `01110100` | `111` |
+| CLOSE (DOWN) | `01110100` | `110` |
+| STOP | `00110100` | `001` |
+| Function key A | `01110100` | `001` |
+| Function key B | `01110100` | `000` |
+| Function key C | `01110100` | `101` |
+| Learn key L | `01110100` | `100` |
+
+`command` is the channel of the remote, the device codes identify the remote.
 
 ## Versioning
 
