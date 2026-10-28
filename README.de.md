@@ -41,11 +41,11 @@ deshalb weicht sie ab, wenn ein Rollladen mit der Original-Fernbedienung bewegt 
 
 ```yaml
 external_components:
-  - source: github://tombrain/esphome-warema-cover-hub@v1.3.1
+  - source: github://tombrain/esphome-warema-cover-hub@v1.4.0
     components: [warema_cover_hub]
 ```
 
-Gib einen Release-Tag an (`@v1.3.1`). Ohne Tag folgt ESPHome dem Branch `main`.
+Gib einen Release-Tag an (`@v1.4.0`). Ohne Tag folgt ESPHome dem Branch `main`.
 
 ## Konfiguration
 

@@ -7,7 +7,7 @@ esp32:
 logger:
 
 external_components:
-  - source: github://tombrain/esphome-warema-cover-hub@v1.3.1
+  - source: github://tombrain/esphome-warema-cover-hub@v1.4.0
     components: [warema_cover_hub]
 
 remote_transmitter:
