@@ -54,13 +54,16 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   }
 
   /// Queues a telegram, e.g. "S01110100111111S000011100S000011101S".
-  void send_command(const std::string &telegram);
+  void send_command(const std::string &telegram) { this->queue_telegram_(telegram, this->number_of_transmissions_); }
+  /// Repeats a telegram for about the given time, like a key held on the remote.
+  void send_command_for(const std::string &telegram, uint32_t duration_ms);
   /// True while the telegram has transmissions left.
   bool is_sending(const std::string &telegram) const { return this->queue_.contains(telegram); }
   /// Drops pending telegrams for the receiver of the given telegram.
   void cancel_pending(const std::string &telegram) { this->queue_.remove_receiver(telegram); }
 
  protected:
+  void queue_telegram_(const std::string &telegram, uint8_t transmissions);
   /// Sends one telegram and returns its duration in microseconds.
   uint32_t transmit_(const std::string &telegram);
   void handle_telegram_(const std::string &telegram);
@@ -80,6 +83,8 @@ class WaremaCoverHub : public Component, public remote_base::RemoteReceiverListe
   std::string last_received_telegram_;
   uint32_t last_received_time_{0};
   EchoFilter echo_filter_;
+  // A random code for a new remote, shown in dump_config
+  std::string suggested_code_;
   CallbackManager<void(const std::string &, const std::string &)> telegram_callback_;
   CallbackManager<void(const std::string &, const std::string &)> unassigned_callback_;
 };

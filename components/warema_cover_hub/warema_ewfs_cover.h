@@ -42,6 +42,14 @@ class WaremaCover : public cover::Cover, public Component, public Parented<Warem
   /// Any telegram with this cover's own command and device codes, for comparing receivers.
   std::string address_telegram() const { return this->build_telegram_(CommandType::STOP); }
 
+  /// Sends the learn key L with this cover's codes for the given time, like holding L on a
+  /// remote. A receiver in learn mode stores these codes as a further remote.
+  void start_learning(uint32_t duration) {
+    this->parent_->send_command_for(this->build_telegram_(CommandType::LEARN), duration);
+  }
+  void stop_learning() { this->parent_->cancel_pending(this->address_telegram()); }
+  bool is_learning() const { return this->parent_->is_sending(this->build_telegram_(CommandType::LEARN)); }
+
   /// Tracks a command the motor received from elsewhere (e.g. the original remote) without
   /// sending anything. Mirrors the receiver: the opposite command stops a moving cover.
   void follow_command(CommandType type);

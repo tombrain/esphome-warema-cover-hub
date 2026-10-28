@@ -178,6 +178,64 @@ Beide kennen `warema_cover_hub_id` (nur bei mehr als einem Hub nötig) und die B
 [Schalter](https://esphome.io/components/switch/#base-switch-configuration) bzw.
 [Textsensoren](https://esphome.io/components/text_sensor/#base-text-sensor-configuration).
 
+### Button: `platform: warema_cover_hub`
+
+Lernt den Hub als weitere Fernbedienung in einen Rollladen ein, die Original-Fernbedienung
+funktioniert weiter. Der Button `learn` sendet die Lerntaste L mit den Codes eines Covers für
+`duration`, wie eine gehaltene Taste L. Ein zweiter Druck beendet das Senden vorzeitig.
+Braucht `transmitter_id` am Hub.
+
+Der Button ist standardmäßig intern: Home Assistant bekommt ihn nicht, er erscheint nur in der
+Weboberfläche des ESP, die dafür `include_internal: true` braucht. Mit `internal: false` ist er
+auch in Home Assistant.
+
+```yaml
+cover:
+  - platform: warema_cover_hub
+    id: bad
+    name: "Bad"
+    command: "111"                 # eigener Code des Hubs, z. B. der zufällige aus dem Log
+    devicecode1: "010110010"
+    devicecode2: "001101011"
+    # ...
+    additional_remotes:            # die Original-Fernbedienung, damit das Cover ihr weiter folgt
+      - command: "111"
+        devicecode1: "000101111"
+        devicecode2: "010011010"
+
+button:
+  - platform: warema_cover_hub
+    cover_id: bad
+    learn:
+      name: "Bad anlernen"
+
+web_server:
+  include_internal: true           # zeigt den Button auf der Webseite des ESP
+```
+
+| Option | Pflicht | Beschreibung |
+|---|---|---|
+| `cover_id` | ja | ID des Covers, dessen Codes eingelernt werden. |
+| `learn` | ja | Der Lern-Button, mit den [Basis-Optionen für Buttons](https://esphome.io/components/button/#base-button-configuration) und: |
+| `learn` > `duration` | nein | Wie lange L gesendet wird, Standard `5s`, 1s bis 20s. An der Fernbedienung muss L etwa 3 Sekunden gehalten werden. |
+| `learn` > `internal` | nein | Standard `true`, der Button ist also nicht in Home Assistant. |
+
+Nimm einen Code, den keine Fernbedienung verwendet. Der Hub schreibt beim Start einen
+zufälligen ins Log (`Random code for a new remote`). Die Gerätecodes beginnen darin mit 0, wie
+bei allen bisher gesehenen Fernbedienungen.
+
+Einlernen, wie bei jeder weiteren Fernbedienung eines Warema-EWFS-Empfängers:
+
+1. An der Fernbedienung mit dem Hauptkanal des Rollladens, also der zuerst eingelernten, L
+   halten, bis der Rollladen einmal winkt. Der Empfänger ist jetzt etwa eine Minute lernbereit.
+2. Den Button drücken. Sobald der Rollladen einmal winkt, den Button erneut drücken.
+3. An der Fernbedienung mit dem Hauptkanal HOCH oder TIEF drücken. Das beendet den Lernmodus.
+4. Zur Kontrolle das Cover aus Home Assistant fahren.
+
+Schalte dafür nicht den Strom des Rollladens aus: Die Lernbereitschaft nach dem Einschalten
+ist für den Hauptkanal gedacht. Ein Empfänger speichert einen Hauptkanal und bis zu 15 weitere
+Fernbedienungen.
+
 ### Event: `platform: warema_cover_hub`
 
 Löst in Home Assistant für jeden Tastendruck auf einem Kanal einer Fernbedienung ein Ereignis aus.

@@ -24,6 +24,7 @@ warema_cover_hub:
 
 cover:
   - platform: warema_cover_hub
+    id: cover_1
     name: "Cover 1"
     command: "111"
     devicecode1: "101010010"
@@ -38,3 +39,9 @@ cover:
     devicecode2: "101010011"
     open_duration: 16s
     close_duration: 18s
+
+button:
+  - platform: warema_cover_hub
+    cover_id: cover_1
+    learn:
+      name: "Learn Cover 1"

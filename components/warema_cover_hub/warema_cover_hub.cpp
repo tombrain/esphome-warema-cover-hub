@@ -1,6 +1,7 @@
 #include "warema_cover_hub.h"
 #include "warema_ewfs_cover.h"
 
+#include <algorithm>
 #include <cstdlib>
 
 #include "esphome/core/hal.h"
@@ -23,6 +24,15 @@ void WaremaCoverHub::setup() {
   // On the ESP8266 the transmitter blocks for the whole telegram (~77 ms). That is expected,
   // so only warn about blocking beyond it.
   this->warn_if_blocking_over_ = BLOCKING_WARN_THRESHOLD_CS;
+
+  // All device codes of real remotes seen so far start with 0
+  const uint32_t random = random_uint32();
+  this->suggested_code_ = "command: 111, devicecode1: 0";
+  for (int i = 0; i < 8; i++)
+    this->suggested_code_.push_back((random >> i) & 1 ? '1' : '0');
+  this->suggested_code_.append(", devicecode2: 0");
+  for (int i = 8; i < 16; i++)
+    this->suggested_code_.push_back((random >> i) & 1 ? '1' : '0');
 }
 
 void WaremaCoverHub::dump_config() {
@@ -31,6 +41,8 @@ void WaremaCoverHub::dump_config() {
   ESP_LOGCONFIG(TAG, "  Receiver: %s", YESNO(this->has_receiver_));
   ESP_LOGCONFIG(TAG, "  Number of transmissions: %u", this->number_of_transmissions_);
   ESP_LOGCONFIG(TAG, "  Registered covers: %u", static_cast<unsigned>(this->covers_.size()));
+  if (this->transmitter_ != nullptr)
+    ESP_LOGCONFIG(TAG, "  Random code for a new remote: %s", this->suggested_code_.c_str());
 }
 
 void WaremaCoverHub::loop() {
@@ -51,7 +63,17 @@ void WaremaCoverHub::loop() {
   this->busy_time_ = (duration_us + 999) / 1000 + TRANSMIT_GAP_MS;
 }
 
-void WaremaCoverHub::send_command(const std::string &telegram) {
+void WaremaCoverHub::send_command_for(const std::string &telegram, uint32_t duration_ms) {
+  uint32_t telegram_us = 0;
+  for (int32_t t : encode_telegram(telegram))
+    telegram_us += std::abs(t);
+  // Each transmission takes the telegram plus the gap, like in loop()
+  const uint32_t period_ms = (telegram_us + 999) / 1000 + TRANSMIT_GAP_MS;
+  const uint32_t transmissions = std::min<uint32_t>((duration_ms + period_ms - 1) / period_ms, UINT8_MAX);
+  this->queue_telegram_(telegram, std::max<uint32_t>(transmissions, 1));
+}
+
+void WaremaCoverHub::queue_telegram_(const std::string &telegram, uint8_t transmissions) {
   if (this->transmitter_ == nullptr) {
     ESP_LOGW(TAG, "Ignoring telegram '%s': no transmitter configured", telegram.c_str());
     return;
@@ -61,7 +83,7 @@ void WaremaCoverHub::send_command(const std::string &telegram) {
              static_cast<unsigned>(TELEGRAM_LENGTH), static_cast<unsigned>(telegram.length()));
     return;
   }
-  if (!this->queue_.push(telegram, this->number_of_transmissions_)) {
+  if (!this->queue_.push(telegram, transmissions)) {
     ESP_LOGW(TAG, "Ignoring telegram '%s': queue is full", telegram.c_str());
     return;
   }

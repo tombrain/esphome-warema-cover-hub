@@ -175,6 +175,61 @@ Both take `warema_cover_hub_id` (needed only with more than one hub) and the bas
 [switch](https://esphome.io/components/switch/#base-switch-configuration) or
 [text sensor](https://esphome.io/components/text_sensor/#base-text-sensor-configuration) options.
 
+### Button: `platform: warema_cover_hub`
+
+Teaches the hub to a blind as a further remote, so the original remote keeps working. The
+button `learn` sends the learn key L with the codes of a cover for `duration`, like holding L
+on a remote. Press it again to stop sending early. Requires `transmitter_id` on the hub.
+
+The button is internal by default: Home Assistant does not get it, it is only on the web
+server of the ESP, which needs `include_internal: true` for it. Set `internal: false` to have
+it in Home Assistant too.
+
+```yaml
+cover:
+  - platform: warema_cover_hub
+    id: bathroom
+    name: "Bathroom"
+    command: "111"                 # own code of the hub, e.g. the random one from the log
+    devicecode1: "010110010"
+    devicecode2: "001101011"
+    # ...
+    additional_remotes:            # the original remote, so the cover still follows it
+      - command: "111"
+        devicecode1: "000101111"
+        devicecode2: "010011010"
+
+button:
+  - platform: warema_cover_hub
+    cover_id: bathroom
+    learn:
+      name: "Bathroom learn"
+
+web_server:
+  include_internal: true           # shows the button on the ESP's web page
+```
+
+| Option | Required | Description |
+|---|---|---|
+| `cover_id` | yes | ID of the cover whose codes are taught. |
+| `learn` | yes | The learn button, with the base [button options](https://esphome.io/components/button/#base-button-configuration) and: |
+| `learn` > `duration` | no | How long L is sent, default `5s`, 1s to 20s. L on a remote has to be held about 3 seconds. |
+| `learn` > `internal` | no | Default `true`, so the button is not in Home Assistant. |
+
+Pick a code no remote uses. The hub logs a random one at startup (`Random code for a new
+remote`), with the device codes starting with 0 like those of all remotes seen so far.
+
+Teaching it, as for any further remote of a Warema EWFS receiver:
+
+1. On the remote with the main channel of the blind, i.e. the one taught first, hold L until
+   the blind waves once. The receiver is now in learn mode for about a minute.
+2. Press the button. When the blind waves once, press it again to stop.
+3. On the remote with the main channel, press UP or DOWN. This ends learn mode.
+4. Move the cover from Home Assistant to check it.
+
+Do not switch off the power of the blind for this: learn mode after power-up is for the main
+channel. A receiver stores one main channel and up to 15 further remotes.
+
 ### Event: `platform: warema_cover_hub`
 
 Fires an event in Home Assistant for every key pressed on one channel of a remote, so the

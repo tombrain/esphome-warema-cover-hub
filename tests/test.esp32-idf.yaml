@@ -69,6 +69,13 @@ cover:
     close_duration: 24s
     members: [cover_1, cover_2]
 
+button:
+  - platform: warema_cover_hub
+    cover_id: cover_1
+    learn:
+      name: "Learn Cover 1"
+      duration: 4s
+
 switch:
   - platform: warema_cover_hub
     name: "Show Warema codes"

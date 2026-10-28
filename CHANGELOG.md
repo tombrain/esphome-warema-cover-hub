@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The learn key L of the remote is recognized: received telegrams show `LEARN` instead of
   `UNKNOWN`, events fire `learn` and `on_unassigned` passes `learn` as key. L sends the
   command bits of OPEN with the suffix `100`.
+- Button platform with a `learn` button that teaches the hub to a blind as a further remote:
+  it sends the learn key with the codes of a cover for `duration` (default 5 s), pressing
+  again stops it.
+  It is internal by default, so only the web server of the ESP shows it, not Home Assistant.
+  The hub logs a random code for a new remote at startup.
 
 ## [1.4.0] - 2026-10-28
 
